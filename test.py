@@ -9,7 +9,9 @@ from langchain.memory import ConversationBufferWindowMemory
 import paho.mqtt.client as mqtt
 from dotenv import load_dotenv
 import json
-from "langchain/output_parsers" import { StructuredOutputParser } 
+from langchain.output_parsers import PydanticOutputParser
+from langchain.prompts import PromptTemplate
+from langchain.pydantic_v1 import BaseModel, Field, validator
 
 MQTT_SERVER = "broker.hivemq.com"
 CLIENTID = "esp32-dht22-clientId-cdf7"
@@ -19,6 +21,13 @@ SUBTOPIC_DOOR = "esp32-dht22/DOOR"
 SUBTOPIC_TEMP = "esp32-dht22/Temp"
 SUBTOPIC_HUMIDITY = "esp32-dht22/Humidity"
 MODEL = r"C:\Users\user\Documents\Programming\NUS\FYP\esp32-llm-bridge\models\llama-2-7b.Q4_K_M.gguf"
+
+
+# Define your desired data structure.
+class State(BaseModel):
+    lights: int = Field(description="1 for on, 0 for off", ge=0, le=1)
+    door: int = Field(description="1 for open, 0 for closed", ge=0, le=1)
+    msg: str = Field(description="Description of state of house")
 
 
 def on_message(client, userdata, msg):
@@ -43,26 +52,27 @@ client.subscribe(SUBTOPIC_HUMIDITY)
 
 
 def send_chat(state, user_input):
-    prompt = f"""
-    The current environment is represented in JSON:
-    {{{json.dumps(state)}}}
-    Please check the environment and update JSON.
-    1 represents on and 0 represents off
-    Format your response as a JSON object with "msg", "light", "door" keys
-    No explanations are required other than the json
-    {user_input}
+    template = f"""
+    The current environment data:
+    {state}
     """
+    parser = PydanticOutputParser(pydantic_object=State)
 
+    prompt = PromptTemplate(
+        template=template + "\n{format_instructions}\n{input}\n",
+        input_variables=["input"],
+        partial_variables={"format_instructions": parser.get_format_instructions()},
+    )
 
-    
     # prompt = PromptTemplate(template=template, input_variables=["input"])
     # Callbacks support token-wise streaming
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
 
     llm = LlamaCpp(
+        seed=100,
         model_path=MODEL,
         temperature=0.75,
-        max_tokens=2000,
+        max_tokens=1000,
         top_p=1,
         callback_manager=callback_manager,
         verbose=True,  # Verbose is required to pass to the callback manager
@@ -71,13 +81,19 @@ def send_chat(state, user_input):
     # conversation = ConversationChain(
     #     prompt=prompt, llm=llm, verbose=True  # memory=memory,
     # )
-    return llm(prompt)
+
+    _input = prompt.format_prompt(input=user_input)
+
+    print("INPUT: " + _input.to_string())
+    output = llm(_input.to_string())
+
+    return parser.parse(output)
 
 
-def get_state(response):
-    state = json.loads(response[response.find("{") : response.find("}") + 1])
-    client.publish(SUBTOPIC_LED, "on" if state["light"] == 1 else "off")
-    client.publish(SUBTOPIC_DOOR, "on" if state["door"] == 1 else "off")
+def publish_state(state: State):
+    print(state.msg)
+    client.publish(SUBTOPIC_LED, "on" if state.lights == 1 else "off")
+    client.publish(SUBTOPIC_DOOR, "on" if state.door == 1 else "off")
     # state = json.loads(response)
     return state
 
@@ -86,20 +102,19 @@ def main():
     load_dotenv()
     # Start the loop to keep listening for incoming messages
     client.loop_start()
-
-    state = {"light": 0, "door": 0, "msg": "The light is off, the door is closed"}
+    state = State(lights=0, door=0, msg="The light is off, the door is closed")
 
     while True:
-        print(json.dumps(state))
+        print(state)
         user_input = input("> ")
         if len(user_input) == 0:
             continue
 
-        response = send_chat(state, user_input)
+        state = send_chat(state, user_input)
         # response = conversation.predict(input=user_input)
-        print(f"Assistant: {response}\n")
+        # print(f"Assistant: {response}\n")
         try:
-            state = get_state(state)
+            publish_state(state)
         except Exception as e:
             print(e)
 
@@ -107,6 +122,7 @@ def main():
 if __name__ == "__main__":
     main()
 
+# Please help to turn on the lights
 
 # while True:
 #     print("Enter 'on' to turn on the light, 'off' to turn it off, or 'quit' to exit.")
