@@ -1,17 +1,12 @@
 from langchain.llms import LlamaCpp
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.chains import ConversationChain
-from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferWindowMemory
 import paho.mqtt.client as mqtt
 from dotenv import load_dotenv
-import json
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
-from langchain.pydantic_v1 import BaseModel, Field, validator
+from langchain.pydantic_v1 import BaseModel, Field
 
 MQTT_SERVER = "broker.hivemq.com"
 CLIENTID = "esp32-dht22-clientId-cdf7"
@@ -33,7 +28,6 @@ class State(BaseModel):
 def on_message(client, userdata, msg):
     topic = msg.topic
     payload = msg.payload.decode("utf-8")
-
     print(f"Received message from topic {topic}: {payload}")
 
 
@@ -44,12 +38,6 @@ client.subscribe(SUBTOPIC_TEMP)
 client.subscribe(SUBTOPIC_HUMIDITY)
 client.connect(MQTT_SERVER, 1883, 60)
 client.on_message = on_message
-
-
-# llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
-# k = 0  # keep last k interactions in memory
-# memory = ConversationBufferWindowMemory(k=k, return_messages=True)
-
 
 def send_chat(state, user_input, llm):
     template = f"""
@@ -64,10 +52,6 @@ def send_chat(state, user_input, llm):
         partial_variables={"format_instructions": parser.get_format_instructions()},
     )
 
-    # conversation = ConversationChain(
-    #     prompt=prompt, llm=llm, verbose=True  # memory=memory,
-    # )
-
     _input = prompt.format_prompt(input=user_input)
 
     print("INPUT: " + _input.to_string())
@@ -80,7 +64,6 @@ def publish_state(state: State):
     print(state.msg)
     client.publish(SUBTOPIC_LED, "on" if state.lights == 1 else "off")
     client.publish(SUBTOPIC_DOOR, "on" if state.door == 1 else "off")
-    # state = json.loads(response)
     return state
 
 
@@ -89,7 +72,6 @@ def main():
     # Start the loop to keep listening for incoming messages
     client.loop_start()
     state = State(lights=0, door=0, msg="The light is off, the door is closed")
-        # prompt = PromptTemplate(template=template, input_variables=["input"])
     # Callbacks support token-wise streaming
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
 
@@ -111,8 +93,6 @@ def main():
             continue
 
         state = send_chat(state, user_input, llm)
-        # response = conversation.predict(input=user_input)
-        # print(f"Assistant: {response}\n")
         try:
             publish_state(state)
         except Exception as e:
@@ -122,5 +102,6 @@ def main():
 if __name__ == "__main__":
     main()
 
+# Prompts to demo: 
 # Please help to turn on the lights
 # Please help to turn off the lights and open the door
