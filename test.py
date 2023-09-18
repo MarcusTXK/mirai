@@ -20,7 +20,7 @@ SUBTOPIC_LED = "esp32-dht22/LED"
 SUBTOPIC_DOOR = "esp32-dht22/DOOR"
 SUBTOPIC_TEMP = "esp32-dht22/Temp"
 SUBTOPIC_HUMIDITY = "esp32-dht22/Humidity"
-MODEL = r"C:\Users\user\Documents\Programming\NUS\FYP\esp32-llm-bridge\models\llama-2-7b.Q4_K_M.gguf"
+MODEL = r"models\llama-2-7b.Q4_K_M.gguf"
 
 
 # Define your desired data structure.
@@ -39,11 +39,11 @@ def on_message(client, userdata, msg):
 
 client = mqtt.Client()
 client.username_pw_set(CLIENTID)
-client.connect(MQTT_SERVER, 1883, 60)
-client.on_message = on_message
 # Subscribe to the topics for temperature and humidity
 client.subscribe(SUBTOPIC_TEMP)
 client.subscribe(SUBTOPIC_HUMIDITY)
+client.connect(MQTT_SERVER, 1883, 60)
+client.on_message = on_message
 
 
 # llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo")
@@ -51,7 +51,7 @@ client.subscribe(SUBTOPIC_HUMIDITY)
 # memory = ConversationBufferWindowMemory(k=k, return_messages=True)
 
 
-def send_chat(state, user_input):
+def send_chat(state, user_input, llm):
     template = f"""
     The current environment data:
     {state}
@@ -62,20 +62,6 @@ def send_chat(state, user_input):
         template=template + "\n{format_instructions}\n{input}\n",
         input_variables=["input"],
         partial_variables={"format_instructions": parser.get_format_instructions()},
-    )
-
-    # prompt = PromptTemplate(template=template, input_variables=["input"])
-    # Callbacks support token-wise streaming
-    callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
-
-    llm = LlamaCpp(
-        seed=100,
-        model_path=MODEL,
-        temperature=0.75,
-        max_tokens=1000,
-        top_p=1,
-        callback_manager=callback_manager,
-        verbose=True,  # Verbose is required to pass to the callback manager
     )
 
     # conversation = ConversationChain(
@@ -103,6 +89,20 @@ def main():
     # Start the loop to keep listening for incoming messages
     client.loop_start()
     state = State(lights=0, door=0, msg="The light is off, the door is closed")
+        # prompt = PromptTemplate(template=template, input_variables=["input"])
+    # Callbacks support token-wise streaming
+    callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+
+    llm = LlamaCpp(
+        seed=100,
+        model_path=MODEL,
+        temperature=0.75,
+        max_tokens=50,
+        top_p=1,
+        f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
+        callback_manager=callback_manager,
+        verbose=True,  # Verbose is required to pass to the callback manager
+    )
 
     while True:
         print(state)
@@ -110,7 +110,7 @@ def main():
         if len(user_input) == 0:
             continue
 
-        state = send_chat(state, user_input)
+        state = send_chat(state, user_input, llm)
         # response = conversation.predict(input=user_input)
         # print(f"Assistant: {response}\n")
         try:
@@ -123,16 +123,4 @@ if __name__ == "__main__":
     main()
 
 # Please help to turn on the lights
-
-# while True:
-#     print("Enter 'on' to turn on the light, 'off' to turn it off, or 'quit' to exit.")
-#     user_input = input("> ").strip().lower()
-
-#     if user_input == "quit":
-#         print("Exiting program.")
-#         break
-#     elif user_input in ["on", "off"]:
-#         client.publish(SUBTOPIC_LED, user_input)
-#         print(f"Sent '{user_input}' to topic {SUBTOPIC_LED}")
-#     else:
-#         print("Invalid input. Please enter 'on', 'off', or 'quit'.")
+# Please help to turn off the lights and open the door
