@@ -17,8 +17,9 @@ static const char *TAG = "MQTT_APP";
 static uint8_t s_led_state = 1;
 
 static esp_mqtt_client_handle_t mqtt_client = NULL;
-static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
-{
+void mqtt_event_handler_cb(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data) {
+    esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t) event_data;
+    
     switch (event->event_id) {
         case MQTT_EVENT_CONNECTED:
             ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
@@ -37,8 +38,8 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
         default:
             break;
     }
-    return ESP_OK;
 }
+
 
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
                                int32_t event_id, void* event_data)
@@ -79,12 +80,29 @@ void app_main(void)
     esp_wifi_start();
 
     // MQTT Configuration
+    // const esp_mqtt_client_config_t mqtt_cfg = {
+    //     .broker.address.uri = "mqtt://broker.hivemq.com",
+    //     // .broker.address.hostname = "broker.hivemq.com",
+    //     // .broker.address.port = 1883,
+    //     // .broker.address.transport = MQTT_TRANSPORT_OVER_TCP,
+    //     .credentials.username = "esp32-dht22-clientId-cdf7",
+    // };
     const esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.uri = "mqtt://broker.hivemq.com",
+        .broker = {
+            .address = {
+                .hostname = "broker.hivemq.com",
+                .port = 1883,
+                .transport = MQTT_TRANSPORT_OVER_TCP,
+            }
+        },
+        .credentials = {
+            .username = "esp32-dht22-clientId-cdf7",
+        },
     };
 
+
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
-    esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, mqtt_event_handler_cb, mqtt_client);
+    esp_mqtt_client_register_event(mqtt_client, MQTT_EVENT_ANY, mqtt_event_handler_cb, mqtt_client);
     esp_mqtt_client_start(mqtt_client);
 
 

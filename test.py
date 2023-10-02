@@ -22,8 +22,8 @@ MODEL = r"models\mistral-7b-instruct-v0.1.Q8_0.gguf"
 # Define your desired data structure.
 class State(BaseModel):
     lights: int = Field(description="1 for on, 0 for off", ge=0, le=1)
-    door: int = Field(description="1 for open, 0 for closed", ge=0, le=1)
-    msg: str = Field(description="Description of state of house")
+    # door: int = Field(description="1 for open, 0 for closed", ge=0, le=1)
+    msg: str = Field(description="Message to reply to user")
 
 
 def on_message(client, userdata, msg):
@@ -33,7 +33,7 @@ def on_message(client, userdata, msg):
 
 
 client = mqtt.Client()
-client.username_pw_set(CLIENTID)
+client.username_pw_set(CLIENTID, PASSWORD)
 # Subscribe to the topics for temperature and humidity
 client.subscribe(SUBTOPIC_TEMP)
 client.subscribe(SUBTOPIC_HUMIDITY)
