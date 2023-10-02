@@ -9,7 +9,7 @@ from langchain.prompts import PromptTemplate
 from langchain.pydantic_v1 import BaseModel, Field
 import pyttsx3
 
-MQTT_SERVER = "broker.hivemq.com"
+MQTT_SERVER = "mqtt.eclipseprojects.io"
 CLIENTID = "esp32-dht22-clientId-cdf7"
 PASSWORD = ""
 SUBTOPIC_LED = "esp32-dht22/LED"
@@ -23,7 +23,7 @@ MODEL = r"models\mistral-7b-instruct-v0.1.Q8_0.gguf"
 class State(BaseModel):
     lights: int = Field(description="1 for on, 0 for off", ge=0, le=1)
     # door: int = Field(description="1 for open, 0 for closed", ge=0, le=1)
-    msg: str = Field(description="Message to reply to user")
+    msg: str = Field(description="Response to the user's commands")
 
 
 def on_message(client, userdata, msg):
@@ -76,7 +76,7 @@ def publish_state(state: State):
     print(state.msg)
     speak(state.msg)
     client.publish(SUBTOPIC_LED, "on" if state.lights == 1 else "off")
-    client.publish(SUBTOPIC_DOOR, "on" if state.door == 1 else "off")
+    # client.publish(SUBTOPIC_DOOR, "on" if state.door == 1 else "off")
     return state
 
 

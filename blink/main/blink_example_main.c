@@ -64,6 +64,7 @@ static void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
         .broker.address.uri = CONFIG_BROKER_URL,
+        .credentials.client_id = "esp32-dht22-clientId-cdf7"
     };
 #if CONFIG_BROKER_URL_FROM_STDIN
     char line[128];
