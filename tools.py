@@ -8,6 +8,9 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import PromptTemplate
 from langchain.pydantic_v1 import BaseModel, Field
 import pyttsx3
+from langchain.tools import DuckDuckGoSearchRun
+from langchain.utilities import WikipediaAPIWrapper
+from langchain.agents import initialize_agent, Tool, AgentType
 
 MQTT_SERVER = "mqtt.eclipseprojects.io"
 CLIENTID = "esp32-dht22-clientId-cdf7"
@@ -88,6 +91,20 @@ def main():
     # Callbacks support token-wise streaming
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
 
+    # wikipedia = WikipediaAPIWrapper()
+    # wikipedia_tool = Tool(
+    #     name="wikipedia",
+    #     func=wikipedia.run,
+    #     description="Useful for when you need to look up a specific company",
+    # )
+    search = DuckDuckGoSearchRun()
+    duckduckgo_tool = Tool(
+        name="Search",
+        func=search.run,
+        description="Useful for when you need to do a search on the internet to find information that another tool can't find. be specific with your input.",
+    )
+    tools = [duckduckgo_tool]  # wikipedia_tool
+
     llm = LlamaCpp(
         seed=100,
         model_path=MODEL,
@@ -97,9 +114,18 @@ def main():
         f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
         callback_manager=callback_manager,
         verbose=True,  # Verbose is required to pass to the callback manager
+        n_ctx=1024,
     )
 
-    state = send_chat(state, "Please output the current state of the house", llm)
+    research_agent = initialize_agent(
+        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+        tools=tools,
+        llm=llm,
+        verbose=True,
+        max_iterations=5,
+    )
+
+    # state = send_chat(state, "Please output the current state of the house", llm)
 
     while True:
         print(state)
@@ -107,11 +133,15 @@ def main():
         if len(user_input) == 0:
             continue
 
-        state = send_chat(state, user_input, llm)
-        try:
-            publish_state(state)
-        except Exception as e:
-            print(e)
+        if user_input.lower().startswith("tell me"):
+            response = research_agent.run(user_input)
+            speak(response)
+        else:
+            state = send_chat(state, user_input, llm)
+            try:
+                publish_state(state)
+            except Exception as e:
+                print(e)
 
 
 if __name__ == "__main__":
@@ -120,3 +150,4 @@ if __name__ == "__main__":
 # Prompts to demo:
 # Please help to turn on the light
 # Please help to turn off the light
+# Tell me who is Professor Ambuj Varshney
