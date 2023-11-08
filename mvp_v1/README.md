@@ -1,4 +1,4 @@
-### Attempting to get ESP32 to communicate with a local LLM
+### Attempting to get Virtual ESP32 to communicate with a local LLM
 
 Windows:
 
