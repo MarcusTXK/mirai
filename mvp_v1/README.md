@@ -11,3 +11,6 @@ py test.py
 ```
 
 Run the esp-32 simulator on wokwi [here](https://wokwi.com/projects/375639338149454849)
+
+### Demo
+![Turn light on esp32](https://github.com/MarcusTXK/esp32-llm-bridge/assets/50147457/7c92160a-0bed-43ad-b11f-22dee86c2935)
