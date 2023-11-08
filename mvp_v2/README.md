@@ -1,4 +1,4 @@
-### Attempting to get ESP32 to communicate with a local LLM
+### Attempting to get ESP32-S3 to communicate with a local LLM
 
 Windows:
 
@@ -10,9 +10,7 @@ pip install -r requirements.txt
 py test.py
 ```
 
-Run the esp-32 simulator on wokwi [here](https://wokwi.com/projects/375639338149454849)
-
-### Commands to run for esp32
+### Commands to run for esp32-S3
 
 ```
 idf.py set-target esp32s3
