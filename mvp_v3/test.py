@@ -120,29 +120,29 @@ def main():
     speak("Starting up, please wait")
    
     # cache intial state and instructions
-    # state = send_chat(state, "Please output the current state of the house", llm)
+    state = send_chat(state, "Please output the current state of the house", llm)
 
     # callback function that calls send_chat
     def parse_audio(user_input):
         global state
-        if len(user_input.strip()) < 5:
+        if isSpeaking or len(user_input.strip()) < 10 or user_input.strip() == blank_audio:
             return
+        print("user_input: " + user_input)
         state = send_chat(state, user_input, llm)
         try:
             publish_state(state)
         except Exception as e:
             print(e)
     
-    def test(user_input):
-        print(user_input)
-        print(isSpeaking)
-        if isSpeaking or len(user_input.strip()) < 10 or user_input.strip() == blank_audio:
-            return
-        print("Speak is being called")
-        speak(user_input)
+    # def test(user_input):
+    #     if isSpeaking or len(user_input.strip()) < 10 or user_input.strip() == blank_audio:
+    #         return
+    #     print(user_input)
+    #     print("Speak is being called")
+    #     speak(user_input)
 
-    my_assistant = Assistant(commands_callback=test , n_threads=8)    
-    # speak("Ready to take in commands")
+    my_assistant = Assistant(commands_callback=parse_audio , n_threads=8)    
+    speak("Ready to take in commands")
     my_assistant.start()
 
     # while True:
