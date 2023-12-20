@@ -10,7 +10,8 @@ from langchain.pydantic_v1 import BaseModel, Field
 import pyttsx3
 from pywhispercpp.examples.assistant import Assistant
 from queue import Queue
-from threading import Thread
+from threading import Thread, Lock
+import time
 
 MQTT_SERVER = "mqtt.eclipseprojects.io"
 CLIENTID = "esp32-dht22-clientId-cdf7"
@@ -46,18 +47,20 @@ client.on_message = on_message
 
 def speak(audio):
     def run_speech(audio_to_speak):
+        global isSpeaking
+        with speak_lock:
+            isSpeaking = True
         engine = pyttsx3.init("sapi5")
         voices = engine.getProperty("voices")
-        engine.setProperty("voice", voices[1].id)  # Adjust the voice index if necessary
-        global isSpeaking
-        isSpeaking = True
+        engine.setProperty("voice", voices[1].id)
         engine.say(audio_to_speak)
-        engine.runAndWait()
-        isSpeaking = False
+        engine.runAndWait()    
+        time.sleep(0.5)  # Delay to ensure no overlap between speaking and listening
+        with speak_lock:
+            isSpeaking = False
 
     speech_thread = Thread(target=run_speech, args=(audio,))
     speech_thread.start()
-
 
 
 def send_chat(state, user_input, llm):
@@ -93,6 +96,7 @@ def publish_state(state: State):
 state = State(light=1, msg="The light is currently on")
 blank_audio = "[BLANK_AUDIO]"
 isSpeaking = False
+speak_lock = Lock()
 
 def main():
     global state
