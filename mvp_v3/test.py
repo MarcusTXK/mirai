@@ -22,7 +22,6 @@ SUBTOPIC_HUMIDITY = "esp32-dht22/Humidity"
 MODEL = r"../models/mistral-7b-instruct-v0.1.Q8_0.gguf"
 
 
-blank_audio = "[BLANK_AUDIO]"
 
 # Define your desired data structure.
 class State(BaseModel):
@@ -50,8 +49,11 @@ def speak(audio):
         engine = pyttsx3.init("sapi5")
         voices = engine.getProperty("voices")
         engine.setProperty("voice", voices[1].id)  # Adjust the voice index if necessary
+        global isSpeaking
+        isSpeaking = True
         engine.say(audio_to_speak)
         engine.runAndWait()
+        isSpeaking = False
 
     speech_thread = Thread(target=run_speech, args=(audio,))
     speech_thread.start()
@@ -89,6 +91,8 @@ def publish_state(state: State):
 
 # Global state
 state = State(light=1, msg="The light is currently on")
+blank_audio = "[BLANK_AUDIO]"
+isSpeaking = False
 
 def main():
     global state
@@ -127,7 +131,8 @@ def main():
     
     def test(user_input):
         print(user_input)
-        if len(user_input.strip()) < 10 or user_input.strip() == blank_audio:
+        print(isSpeaking)
+        if isSpeaking or len(user_input.strip()) < 10 or user_input.strip() == blank_audio:
             return
         print("Speak is being called")
         speak(user_input)
