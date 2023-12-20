@@ -10,6 +10,17 @@ pip install -r requirements.txt
 py test.py
 ```
 
+
+Linux:
+```
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements-linux.txt
+
+python3 test.py
+```
+
+
 Run the esp-32 simulator on wokwi [here](https://wokwi.com/projects/375639338149454849)
 
 ### Demo

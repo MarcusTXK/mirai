@@ -15,7 +15,7 @@ SUBTOPIC_LED = "esp32-dht22/LED"
 SUBTOPIC_DOOR = "esp32-dht22/DOOR"
 SUBTOPIC_TEMP = "esp32-dht22/Temp"
 SUBTOPIC_HUMIDITY = "esp32-dht22/Humidity"
-MODEL = r"models\llama-2-7b.Q4_K_M.gguf"
+MODEL = r"../models/llama-2-7b.Q4_K_M.gguf"
 
 
 # Define your desired data structure.
@@ -79,7 +79,7 @@ def main():
         seed=100,
         model_path=MODEL,
         temperature=0.75,
-        max_tokens=50,
+        max_tokens=100,
         top_p=1,
         f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
         callback_manager=callback_manager,
