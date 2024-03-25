@@ -1,13 +1,30 @@
-### Attempting to get ESP32-S3 to communicate with a local LLM
-
-Windows:
+### Install ffmpeg and portaudio library
 
 ```
-py -m venv venv
-venv\Scripts\activate
+# on Ubuntu or Debian
+sudo apt update
+sudo apt install ffmpeg
+sudo apt-get install libportaudio2
+```
+
+### Attempting to get ESP32-S3 to communicate with a local LLM
+
+You need python-3.9 and python3.9-dev
+
+```
+sudo apt-get update
+sudo apt-get install python3.9 python3.9-dev
+```
+
+Linux:
+
+```
+python3.9 -m venv env
+source env/bin/activate
+
 pip install -r requirements.txt
 
-py test.py
+python main.py
 ```
 
 ### Commands to run for esp32-S3
