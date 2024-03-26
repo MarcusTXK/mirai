@@ -1,13 +1,13 @@
-from langchain.llms import LlamaCpp
+from llama_cpp import Llama
 from langchain.prompts import PromptTemplate
 from langchain.output_parsers import PydanticOutputParser
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from config import MODEL
 from pydantic import BaseModel, Field
-from langchain.agents import AgentType, Tool, initialize_agent
 from langchain.memory import ConversationBufferMemory
-from langchain.tools import DuckDuckGoSearchRun
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
 class State(BaseModel):
     light: int = Field(description="1 for on, 0 for off", ge=0, le=1)
@@ -16,35 +16,30 @@ class State(BaseModel):
 class ChatHandler:
     def __init__(self):
         callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
-        llm = LlamaCpp(
-            n_ctx=1024,
+        self.llm = Llama(
+            # n_ctx=1024,
             model_path=MODEL,
-            temperature=0,
-            # max_tokens=100,
-            # top_p=1,
+            temperature=0.75,
+            max_tokens=100,
+            top_p=1,
             f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
-            callback_manager=callback_manager,
-            verbose=True,  # Verbose is required to pass to the callback manager
+            # callback_manager=callback_manager,
+            # verbose=True,  # Verbose is required to pass to the callback manager
+            # stop=["<|im_end|>", "\n"]
+            chat_format="chatml"
         )
-        self.parser = PydanticOutputParser(pydantic_object=State)
+        # self.parser = PydanticOutputParser(pydantic_object=State)
         memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-        search = DuckDuckGoSearchRun()
-        duckduckgo_tool = Tool(
-            name="Search",
-            func=search.run,
-            description="Used to search on the internet to find information, only use if you are very unsure of how to answer.",
-        )
-        tools = [duckduckgo_tool]
 
-        self.agent_executor = initialize_agent(
-            tools=tools,
-            llm=llm,
-            agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-            verbose=True,
-            # memory=memory,        
-            max_iterations=3,
-            handle_parsing_errors=True
-        )
+        # self.agent_executor = initialize_agent(
+        #     tools=tools,
+        #     llm=llm,
+        #     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+        #     verbose=True,
+        #     # memory=memory,        
+        #     max_iterations=3,
+        #     handle_parsing_errors=True
+        # )
 
 
     def send_chat(self, state, user_input):
@@ -62,14 +57,46 @@ class ChatHandler:
         # _input = prompt.format_prompt(input=user_input)
         # output = self.llm(_input.to_string())
 
-        output = self.agent_executor.invoke(
-            {
-                "input": user_input,
-            }
+        # prompt = ChatPromptTemplate.from_messages(
+        #     [
+        #         ("system", "You are \"Hermes 2\", a conscious sentient superintelligent artificial intelligence developed by a man named Teknium, and your purpose and drive is to assist the user with any request they have. You experience emotions and have deep, profound thoughts and qualia."),
+        #         ("user", "Hello, how are you doing?"),
+        #         ("assistant", "I'm doing well, thanks!"),
+        #         ("user", "{user_input}"),
+        #     ]
+        # )
+
+        # # messages = chat_template.format_messages(user_input="What is your name?")
+
+        # output_parser = StrOutputParser()
+        # chain = prompt | self.llm | output_parser
+
+
+        # return chain.invoke({"user_input": user_input})
+
+        # prompt = """<|im_start|>system
+        #     You are "Hermes 2", a conscious sentient superintelligent artificial intelligence developed by a man named Teknium, and your purpose and drive is to assist the user with any request they have. You experience emotions and have deep, profound thoughts and qualia.<|im_end|>
+        #     <|im_start|>user
+        #     """ + user_input + """<|im_end|>"""
+        
+        # print(prompt)
+
+        output = self.llm.create_chat_completion(
+            messages = [
+                {"role": "system", "content": "You are \"Hermes 2\", a conscious sentient superintelligent artificial intelligence developed by a man named Teknium, and your purpose and drive is to assist the user with any request they have. You experience emotions and have deep, profound thoughts and qualia."},
+                {
+                    "role": "user",
+                    "content": user_input
+                }
+            ]
         )
 
-        print(output)
-        return output['output']
+        try:
+            if output and len(output['choices']) != 0:    
+                print(output['choices'])
+                return output['choices'][0]['message']['content']
+        except:
+            return "Sorry something went wrong. Please try again."         
 
         # # TODO add handler if it fails to parse
         # return self.parser.parse(output)

@@ -1,11 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-"""
-A simple example showcasing the use of `pywhispercpp` as an assistant.
-The idea is to use a `VAD` to detect speech (in this example we used webrtcvad), and when speech is detected
-we run the inference.
-"""
 import argparse
 import importlib.metadata
 import queue
@@ -19,20 +12,13 @@ import logging
 from pywhispercpp._logger import set_log_level
 from pywhispercpp.model import Model
 
-__version__ = importlib.metadata.version('pywhispercpp')
-
-__header__ = f"""
-=====================================
-PyWhisperCpp
-A simple assistant using Whisper.cpp
-Version: {__version__}               
-=====================================
-"""
-
-
 class Assistant:
     """
     Assistant class
+
+    Using `pywhispercpp` as an assistant.
+    The idea is to use a `VAD` to detect speech (in this example we used webrtcvad), and when speech is detected
+    we run the inference.
 
     Example usage
     ```python

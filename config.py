@@ -6,4 +6,5 @@ SUBTOPIC_LED = "esp32-dht22/LED"
 SUBTOPIC_DOOR = "esp32-dht22/DOOR"
 SUBTOPIC_TEMP = "esp32-dht22/Temp"
 SUBTOPIC_HUMIDITY = "esp32-dht22/Humidity"
-MODEL = r"./models/mistral-7b-instruct-v0.2.Q5_K_M.gguf"
+MODEL = r"./models/Hermes-2-Pro-Mistral-7B.Q5_K_M.gguf"
+IS_USE_TOOLS = False

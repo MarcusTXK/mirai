@@ -1,7 +1,9 @@
+from assistant import Assistant
+from config import IS_USE_TOOLS
 from mqtt_client import MQTTClient
 from chat_handler import ChatHandler, State
+from chat_handler_with_tools import ChatHandlerWithTools, State
 from speech import Speech
-from pywhispercpp.examples.assistant import Assistant
 
 def on_mqtt_message(client, userdata, msg):
     # Process MQTT messages here
@@ -12,6 +14,10 @@ blank_audio = "[BLANK_AUDIO]"
 def main():
     mqtt_client = MQTTClient(on_message_callback=on_mqtt_message)
     chat_handler = ChatHandler()
+    if IS_USE_TOOLS:
+        chat_handler = ChatHandlerWithTools()
+
+
     speech = Speech()
 
     # Connect and start the MQTT client
@@ -41,7 +47,7 @@ def main():
 
     # Main application loop
     try:
-        my_assistant = Assistant(commands_callback=parse_audio , n_threads=8, model='base.en')    
+        my_assistant = Assistant(commands_callback=parse_audio , n_threads=8, model='small.en')    
         speech.speak("Ready to take in commands")
         my_assistant.start()
     finally:
