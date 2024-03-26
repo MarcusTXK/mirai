@@ -6,6 +6,11 @@ class Speech:
     def __init__(self):
         self.speak_lock = Lock()
         self.isSpeaking = False
+        self.language = b'\x02en-gb'
+        self.gender = 'male'
+        self.engine = pyttsx3.init('espeak')
+        self.engine.setProperty('rate', 170)
+        self.change_voice(self.engine)
 
     def speak(self, audio):
         if not self.isSpeaking:
@@ -19,14 +24,21 @@ class Speech:
             self.isSpeaking = True
             print("Speech thread acquired lock, speaking...")
             try:
-                engine = pyttsx3.init("sapi5")
-                voices = engine.getProperty("voices")
-                engine.setProperty("voice", voices[1].id)
-                engine.say(audio_to_speak)
-                engine.runAndWait()
+                
+                self.engine.say(audio_to_speak)
+                self.engine.runAndWait()
                 time.sleep(0.5)  # Delay to ensure no overlap between speaking and listening
             except Exception as e:
                 print(f"Error in speech engine: {e}")
             finally:
                 print("Resetting isSpeaking flag")
+                # engine.stop()
                 self.isSpeaking = False
+
+    def change_voice(self, engine):
+        for voice in engine.getProperty('voices'):
+            if self.language in voice.languages and self.gender == voice.gender:
+                engine.setProperty('voice', voice.id)
+                return True
+
+        raise RuntimeError("Language '{}' for gender '{}' not found".format(self.language, self.gender))

@@ -5,7 +5,7 @@ All instructions below assume you are on on Ubuntu or Debian.
 ```
 sudo apt update
 sudo apt install ffmpeg
-sudo apt-get install libportaudio2
+sudo apt-get install libportaudio2 espeak
 ```
 
 ### Attempting to get ESP32-S3 to communicate with a local LLM
