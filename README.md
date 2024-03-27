@@ -21,6 +21,13 @@ pip install -r requirements.txt
 python main.py
 ```
 
+```
+curl -fsSL https://ollama.com/install.sh | sh
+
+sudo ollama serve
+ollama pull mistral-openorca:7b-q5_K_M
+```
+
 ### Commands to run for esp32-S3
 
 ```

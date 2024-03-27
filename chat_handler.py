@@ -1,13 +1,16 @@
-from llama_cpp import Llama
-from langchain.prompts import PromptTemplate
-from langchain.output_parsers import PydanticOutputParser
-from langchain.callbacks.manager import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from config import MODEL
+from langchain_community.llms import Ollama
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.chains import create_history_aware_retriever
+from langchain_core.prompts import MessagesPlaceholder
 from pydantic import BaseModel, Field
-from langchain.memory import ConversationBufferMemory
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain_community.embeddings import OllamaEmbeddings
+from langchain_core.documents import Document
+from langchain_community.vectorstores import FAISS
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+from langchain.chains import create_history_aware_retriever
 
 class State(BaseModel):
     light: int = Field(description="1 for on, 0 for off", ge=0, le=1)
@@ -15,88 +18,47 @@ class State(BaseModel):
 
 class ChatHandler:
     def __init__(self):
-        callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
-        self.llm = Llama(
-            # n_ctx=1024,
-            model_path=MODEL,
-            temperature=0.75,
-            max_tokens=100,
-            top_p=1,
-            f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
-            # callback_manager=callback_manager,
-            # verbose=True,  # Verbose is required to pass to the callback manager
-            # stop=["<|im_end|>", "\n"]
-            chat_format="chatml"
-        )
-        # self.parser = PydanticOutputParser(pydantic_object=State)
-        memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
-        # self.agent_executor = initialize_agent(
-        #     tools=tools,
-        #     llm=llm,
-        #     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-        #     verbose=True,
-        #     # memory=memory,        
-        #     max_iterations=3,
-        #     handle_parsing_errors=True
-        # )
+        self.llm = Ollama(model="mistral-openorca:7b-q5_K_M")
+        self.history=[]
 
 
     def send_chat(self, state, user_input):
-        # template = f"""
-        # The current environment data: {state}
-        # """
-        # prompt = PromptTemplate(
-        #     template="<s>[INST]\n{format_instructions}\nNo explanations are neded other than the JSON."
-        #     + template
-        #     + "</s>\n[INST]{input}[/INST]",
-        #     input_variables=["input"],
-        #     partial_variables={"format_instructions": self.parser.get_format_instructions()},
-        # )
 
-        # _input = prompt.format_prompt(input=user_input)
-        # output = self.llm(_input.to_string())
+        # embeddings = OllamaEmbeddings(model="mistral-openorca:7b-q5_K_M")
+        # documents = [Document(page_content="langsmith can let you visualize test results")]
+        # vectorDb = FAISS.from_documents(documents, embeddings)
 
-        # prompt = ChatPromptTemplate.from_messages(
-        #     [
-        #         ("system", "You are \"Hermes 2\", a conscious sentient superintelligent artificial intelligence developed by a man named Teknium, and your purpose and drive is to assist the user with any request they have. You experience emotions and have deep, profound thoughts and qualia."),
-        #         ("user", "Hello, how are you doing?"),
-        #         ("assistant", "I'm doing well, thanks!"),
-        #         ("user", "{user_input}"),
-        #     ]
-        # )
+        # retriever = vectorDb.as_retriever()
+        output_parser = StrOutputParser()
 
-        # # messages = chat_template.format_messages(user_input="What is your name?")
+        # prompt = ChatPromptTemplate.from_messages([
+        #     ("system", "You are mirai, a helpful home assistant. Write out your reasoning step-by-step to be sure you get the right answers! Answer the user's questions based on the below context:\n\n"),
+        #     MessagesPlaceholder(variable_name="chat_history"),
+        #     ("user", "{input}"),
+        # ])
+        # history_retriever_chain = create_history_aware_retriever(self.llm, retriever, prompt)
 
-        # output_parser = StrOutputParser()
-        # chain = prompt | self.llm | output_parser
+        # # document_chain = create_stuff_documents_chain(self.llm, prompt)
 
-
-        # return chain.invoke({"user_input": user_input})
-
-        # prompt = """<|im_start|>system
-        #     You are "Hermes 2", a conscious sentient superintelligent artificial intelligence developed by a man named Teknium, and your purpose and drive is to assist the user with any request they have. You experience emotions and have deep, profound thoughts and qualia.<|im_end|>
-        #     <|im_start|>user
-        #     """ + user_input + """<|im_end|>"""
+        # # retrieval_chain = create_retrieval_chain(history_retriever_chain, document_chain) | output_parser
         
-        # print(prompt)
+        # # output = retrieval_chain.invoke({"input": user_input, "chat_history": self.history})
+        # output = history_retriever_chain.invoke({"input": user_input, "chat_history": self.history}) | output_parser
 
-        output = self.llm.create_chat_completion(
-            messages = [
-                {"role": "system", "content": "You are \"Hermes 2\", a conscious sentient superintelligent artificial intelligence developed by a man named Teknium, and your purpose and drive is to assist the user with any request they have. You experience emotions and have deep, profound thoughts and qualia."},
-                {
-                    "role": "user",
-                    "content": user_input
-                }
-            ]
-        )
+        # self.history.append(("user", user_input))
+        # self.history.append(("assistant", output))
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", "You are mirai, a helpful home assistant. Think before writing and output the response you would like to speak to the user."),
+            ("user", "{input}")
+        ])
+        chain = prompt | self.llm | output_parser
+        output = chain.invoke({"input": user_input})
+        starting_word = "Mirai:"
+        ending_token = "<|im_end|>"
+        if (output and output.endswith(ending_token)):
+            output = output.removesuffix(ending_token)
+        if (output and output.startswith(starting_word)):
+            output = output.removeprefix(starting_word)
+        return output
+        
 
-        try:
-            if output and len(output['choices']) != 0:    
-                print(output['choices'])
-                return output['choices'][0]['message']['content']
-        except:
-            return "Sorry something went wrong. Please try again."         
-
-        # # TODO add handler if it fails to parse
-        # return self.parser.parse(output)

@@ -14,8 +14,8 @@ blank_audio = "[BLANK_AUDIO]"
 def main():
     mqtt_client = MQTTClient(on_message_callback=on_mqtt_message)
     chat_handler = ChatHandler()
-    if IS_USE_TOOLS:
-        chat_handler = ChatHandlerWithTools()
+    # if IS_USE_TOOLS:
+    #     chat_handler = ChatHandlerWithTools()
 
 
     speech = Speech()
@@ -28,18 +28,20 @@ def main():
     global state
     state = State(light=1, msg="Hello, nice to meet you.")
     speech.speak("Starting up, please wait")
-    chat_handler.send_chat(state, "Hi, my name is Marcus, nice to meet you.")
+    print(chat_handler.send_chat(state, "Hi, my name is Marcus, nice to meet you."))
+    speech.speak("Ready to take in input")
+
 
     def parse_audio(user_input): 
         global state
-        print("pre user_input: " + user_input)
-        print(speech.isSpeaking)
+        print("pre-parsed user_input: ", user_input)
+        print("isSpeaking", speech.isSpeaking)
         if speech.isSpeaking or len(user_input.strip()) < 10 or user_input.strip() == blank_audio:
             return
-        print("user_input: " + user_input)
+        print("parsed user_input: ", user_input)
         resp = chat_handler.send_chat(state, user_input)
         try:
-            print(resp)
+            print("resp", resp)
             speech.speak(resp)
             # client.publish(SUBTOPIC_LED, "on" if state.light == 1 else "off")
         except Exception as e:
@@ -47,7 +49,7 @@ def main():
 
     # Main application loop
     try:
-        my_assistant = Assistant(commands_callback=parse_audio , n_threads=8, model='small.en')    
+        my_assistant = Assistant(commands_callback=parse_audio , n_threads=8, model='base.en')    
         speech.speak("Ready to take in commands")
         my_assistant.start()
     finally:
