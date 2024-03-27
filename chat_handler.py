@@ -12,6 +12,8 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain.chains import create_history_aware_retriever
 
+from speech_streamer import SpeechStreamer
+
 class State(BaseModel):
     light: int = Field(description="1 for on, 0 for off", ge=0, le=1)
     msg: str = Field(description="Response to the user's commands")
@@ -51,14 +53,24 @@ class ChatHandler:
             ("system", "You are mirai, a helpful home assistant. Think before writing and output the response you would like to speak to the user."),
             ("user", "{input}")
         ])
-        chain = prompt | self.llm | output_parser
-        output = chain.invoke({"input": user_input})
-        starting_word = "Mirai:"
-        ending_token = "<|im_end|>"
-        if (output and output.endswith(ending_token)):
-            output = output.removesuffix(ending_token)
-        if (output and output.startswith(starting_word)):
-            output = output.removeprefix(starting_word)
+        chain = prompt | self.llm  # | output_parser
+        output = ""
+        streamer = SpeechStreamer()
+        for chunk in chain.stream({"input": user_input}):
+            # print(chunk)
+            streamer.process_and_speak(chunk)
+            output += chunk 
+            
+        # Handle any remaining buffered text
+        streamer.flush_and_speak()
+        # starting_word = "Mirai:"
+        # ending_token = "<|im_end|>"
+        # if (output and output.endswith(ending_token)):
+        #     output = output.removesuffix(ending_token)
+        # if (output and output.startswith(starting_word)):
+        #     output = output.removeprefix(starting_word)
         return output
+    
+
         
 

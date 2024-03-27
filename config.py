@@ -9,3 +9,4 @@ SUBTOPIC_HUMIDITY = "esp32-dht22/Humidity"
 MODEL = r"./models/Hermes-2-Pro-Mistral-7B.Q5_K_M.gguf"
 OLAMA_KEY= "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILFQd4zduO87nyoDa0eomu1lJk4TG4Twx9iQ7OvTTiJ3"
 IS_USE_TOOLS = False
+USER_NAME = "Marcus"
