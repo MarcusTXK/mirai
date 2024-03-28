@@ -50,25 +50,18 @@ class ChatHandler:
         # self.history.append(("user", user_input))
         # self.history.append(("assistant", output))
         prompt = ChatPromptTemplate.from_messages([
-            ("system", "You are mirai, a helpful home assistant. Think before writing and output the response you would like to speak to the user."),
+            ("system", "You are a helpful home assistant. Think before writing and output the response you would like to speak to the user."),
             ("user", "{input}")
         ])
-        chain = prompt | self.llm  # | output_parser
+        chain = prompt | self.llm
         output = ""
         streamer = SpeechStreamer()
         for chunk in chain.stream({"input": user_input}):
-            # print(chunk)
             streamer.process_and_speak(chunk)
             output += chunk 
             
-        # Handle any remaining buffered text
         streamer.flush_and_speak()
-        # starting_word = "Mirai:"
-        # ending_token = "<|im_end|>"
-        # if (output and output.endswith(ending_token)):
-        #     output = output.removesuffix(ending_token)
-        # if (output and output.startswith(starting_word)):
-        #     output = output.removeprefix(starting_word)
+        streamer.stop()
         return output
     
 

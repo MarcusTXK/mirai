@@ -1,5 +1,5 @@
 from assistant import Assistant
-from config import IS_USE_TOOLS, USER_NAME
+from config import IS_USE_TOOLS, USER_NAME, WAKE_WORD
 from mqtt_client import MQTTClient
 from chat_handler import ChatHandler, State
 from chat_handler_with_tools import ChatHandlerWithTools, State
@@ -11,7 +11,7 @@ def on_mqtt_message(client, userdata, msg):
     # Process MQTT messages here
     pass
 
-blank_audio = "[BLANK_AUDIO]"
+blank_audio = {"[BLANK_AUDIO]", "[ Silence ]"}
 
 def main():
     mqtt_client = MQTTClient(on_message_callback=on_mqtt_message)
@@ -32,7 +32,8 @@ def main():
 
     speech_streamer = SpeechStreamer()
     speech_streamer.stream_speech("Starting up. Please wait.")
-    
+    speech_streamer.stop(False)
+
     print(chat_handler.send_chat(state, "Hi, my name is" + USER_NAME ))
 
 
@@ -40,7 +41,10 @@ def main():
         global state
         print("pre-parsed user_input: ", user_input)
         print("isSpeaking", global_state_manager.is_speaking())
-        if global_state_manager.is_speaking() or len(user_input.strip()) < 10 or user_input.strip() == blank_audio:
+        parsed_user_input = user_input.strip()
+        if global_state_manager.is_speaking() or len(parsed_user_input) < 10 or any(blank in parsed_user_input for blank in blank_audio):
+            return 
+        if WAKE_WORD and not parsed_user_input.startswith(WAKE_WORD):
             return
         print("parsed user_input: ", user_input)
         resp = chat_handler.send_chat(state, user_input)
@@ -57,7 +61,6 @@ def main():
         my_assistant.start()
     finally:
         mqtt_client.stop()
-        speech_streamer.stop()
 
 if __name__ == "__main__":
     main()

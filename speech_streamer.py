@@ -70,7 +70,12 @@ class SpeechStreamer:
             self.stream_speech(self.buffered_text.strip())
             self.buffered_text = ""  # Reset buffer after speaking
 
-    def stop(self):
+    def stop(self, is_beep = True):
         """Stops the audio player thread."""
+        if is_beep:
+            beep_sound_path=r"./resources/sounds/beep.mp3"
+            beep_sound = AudioSegment.from_file(beep_sound_path)
+            self.audio_queue.put(beep_sound)  # Queue the beep sound to indicate its complete
         self.audio_queue.put(None)  # Signal the thread to stop
+
         self.playback_thread.join()
