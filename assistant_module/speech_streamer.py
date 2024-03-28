@@ -4,7 +4,7 @@ from pydub import AudioSegment
 from pydub.playback import play
 import threading
 import queue
-from global_state_manager import global_state_manager
+from assistant_module.global_state_manager import global_state_manager
 
 class SpeechStreamer:
     def __init__(self):

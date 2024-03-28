@@ -12,7 +12,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain.chains import create_history_aware_retriever
 
-from speech_streamer import SpeechStreamer
+from assistant_module.speech_streamer import SpeechStreamer
 
 class State(BaseModel):
     light: int = Field(description="1 for on, 0 for off", ge=0, le=1)
@@ -24,7 +24,7 @@ class ChatHandler:
         self.history=[]
 
 
-    def send_chat(self, state, user_input):
+    def send_chat(self, user_input):
 
         # embeddings = OllamaEmbeddings(model="mistral-openorca:7b-q5_K_M")
         # documents = [Document(page_content="langsmith can let you visualize test results")]

@@ -1,4 +1,3 @@
-
 import argparse
 import importlib.metadata
 import queue
@@ -12,7 +11,7 @@ import logging
 from pywhispercpp._logger import set_log_level
 from pywhispercpp.model import Model
 
-class Assistant:
+class WhisperAssistant:
     """
     Assistant class
 
@@ -142,7 +141,7 @@ def _main():
     parser.add_argument('-m', '--model', default='tiny.en', type=str, help="Whisper.cpp model, default to %(default)s")
     parser.add_argument('-ind', '--input_device', type=int, default=None,
                         help=f'Id of The input device (aka microphone)\n'
-                             f'available devices {Assistant.available_devices()}')
+                             f'available devices {WhisperAssistant.available_devices()}')
     parser.add_argument('-st', '--silence_threshold', default=16, type=int,
                         help=f"he duration of silence after which the inference will be running, default to %(default)s")
     parser.add_argument('-bd', '--block_duration', default=30,
@@ -150,7 +149,7 @@ def _main():
 
     args = parser.parse_args()
 
-    my_assistant = Assistant(model=args.model,
+    my_assistant = WhisperAssistant(model=args.model,
                              input_device=args.input_device,
                              silence_threshold=args.silence_threshold,
                              block_duration=args.block_duration,
