@@ -1,5 +1,7 @@
+from threading import Thread
 from assistant_module.whisper_assistant import WhisperAssistant
 from config import IS_USE_TOOLS, USER_NAME, WAKE_WORD
+from flask_module.app import create_app
 from mqtt_module.mqtt_client import MQTTClient
 from assistant_module.chat_handler import ChatHandler
 from assistant_module.chat_handler_with_tools import ChatHandlerWithTools, State
@@ -55,5 +57,12 @@ def main():
     finally:
         mqtt_client.stop()
 
+app = create_app()
+
+def run_app():
+    app.run()
+    
 if __name__ == "__main__":
+    t = Thread(target=run_app)
+    t.start()
     main()

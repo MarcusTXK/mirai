@@ -1,0 +1,50 @@
+### Create User Preference
+POST http://localhost:5000/preferences/
+Content-Type: application/json
+
+{
+  "description": "User preference description here",
+  "updatedBy": "User"
+}
+
+###
+
+### Get All User Preferences
+GET http://localhost:5000/preferences/
+Accept: application/json
+
+###
+
+### Update User Preference (replace :id with actual ID)
+PUT http://localhost:5000/preferences/:id
+Content-Type: application/json
+
+{
+  "description": "Updated description here",
+  "updatedBy": "Updated by User ID or Name"
+}
+
+###
+
+### Delete User Preference (replace :id with actual ID)
+DELETE http://localhost:5000/preferences/:id
+Accept: application/json
+
+###
+
+### Create Chat Log
+POST http://localhost:5000/chatlog/
+Content-Type: application/json
+
+{
+  "sentBy": "Sender's Name or ID",
+  "message": "The chat message text"
+}
+
+###
+
+### Get All Chat Logs
+GET http://localhost:5000/chatlog/
+Accept: application/json
+
+###
