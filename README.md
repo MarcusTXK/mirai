@@ -25,7 +25,9 @@ python main.py
 ```
 curl -fsSL https://ollama.com/install.sh | sh
 
+systemctl stop ollama
 sudo ollama serve
+# on a seperate terminal
 ollama pull mistral-openorca:7b-q5_K_M
 ```
 

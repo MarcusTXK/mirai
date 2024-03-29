@@ -1,13 +1,12 @@
-# Configuration parameters
+# Config for MQTT
 MQTT_SERVER = "mqtt.eclipseprojects.io"
 CLIENTID = "esp32-dht22-clientId-cdf7"
 PASSWORD = ""
-SUBTOPIC_LED = "esp32-dht22/LED"
-SUBTOPIC_DOOR = "esp32-dht22/DOOR"
-SUBTOPIC_TEMP = "esp32-dht22/Temp"
-SUBTOPIC_HUMIDITY = "esp32-dht22/Humidity"
-MODEL = r"./models/Hermes-2-Pro-Mistral-7B.Q5_K_M.gguf"
-OLAMA_KEY= "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILFQd4zduO87nyoDa0eomu1lJk4TG4Twx9iQ7OvTTiJ3"
+SUBTOPICS = ["esp32-dht22/LED", "esp32-dht22/DOOR", "esp32-dht22/Temp", "esp32-dht22/Humidity"]
+
+# Config for LLM
 IS_USE_TOOLS = False
 USER_NAME = "Marcus"
-WAKE_WORD = ""
+WAKE_WORD = "" # Experimental, not recommended to set
+MODEL_NAME = "mistral-openorca:7b-q5_K_M"
+INDEX_PATH = "./instance/preferences_index"

@@ -3,7 +3,7 @@ POST http://localhost:5000/preferences/
 Content-Type: application/json
 
 {
-  "description": "User preference description here",
+  "description": "My favourite food is chocolate",
   "updatedBy": "User"
 }
 
@@ -15,13 +15,19 @@ Accept: application/json
 
 ###
 
+### Post Generate new index for preferences
+POST http://localhost:5000/preferences/generate-index
+Accept: application/json
+
+###
+
 ### Update User Preference (replace :id with actual ID)
-PUT http://localhost:5000/preferences/:id
+PUT http://localhost:5000/preferences/1
 Content-Type: application/json
 
 {
-  "description": "Updated description here",
-  "updatedBy": "Updated by User ID or Name"
+  "description": "My favourite food is watermelon",
+  "updatedBy": "User"
 }
 
 ###

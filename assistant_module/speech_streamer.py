@@ -47,12 +47,12 @@ class SpeechStreamer:
         """Processes text chunks for speech, handling punctuation-induced pauses."""
         pause_punctuations = {",", ";", ":", "—"}
         end_punctuations = {".", "?", "!"}
-        ignore_chunk = {"<|im_end|>"}
+        # ignore_chunk = {"<|im_end|>"}
+        
+        # if any(text_chunk.endswith(ignore) for ignore in ignore_chunk):
+        #     return
         
         # Accumulate text in the buffer
-        if any(text_chunk.endswith(ignore) for ignore in ignore_chunk):
-            return
-
         self.buffered_text += text_chunk
 
         # Decide when to speak based on the punctuation
@@ -60,8 +60,9 @@ class SpeechStreamer:
             self.stream_speech(self.buffered_text.strip())
             self.buffered_text = ""  # Reset buffer after speaking
         elif any(text_chunk.endswith(punct) for punct in pause_punctuations):
-            # For now, just accumulate without resetting the buffer
             # Future implementation may handle shorter pauses directly
+            self.stream_speech(self.buffered_text.strip())
+            self.buffered_text = ""  # Reset buffer after speaking
             pass
 
     def flush_and_speak(self):

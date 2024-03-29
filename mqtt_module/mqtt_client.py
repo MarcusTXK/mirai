@@ -1,5 +1,5 @@
 import paho.mqtt.client as mqtt
-from config import MQTT_SERVER, CLIENTID, PASSWORD, SUBTOPIC_TEMP, SUBTOPIC_HUMIDITY
+from config import MQTT_SERVER, CLIENTID, PASSWORD, SUBTOPICS
 
 class MQTTClient:
     def __init__(self, on_message_callback):
@@ -9,8 +9,8 @@ class MQTTClient:
 
     def connect(self):
         self.client.connect(MQTT_SERVER, 1883, 60)
-        self.client.subscribe(SUBTOPIC_TEMP)
-        self.client.subscribe(SUBTOPIC_HUMIDITY)
+        for subtopic in SUBTOPICS:
+            self.client.subscribe(subtopic)
 
     def publish(self, topic, message):
         self.client.publish(topic, message)
