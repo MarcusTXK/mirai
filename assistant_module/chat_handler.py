@@ -18,6 +18,7 @@ langchain.debug = True
 
 class ChatHandler:
     MAX_HISTORY_SIZE = 2
+    MAX_CONTEXT_SIZE = 2
     SYSTEM_MESSAGE = "You are a helpful home assistant. Think before writing and output the response you would like to speak to the user."
     IGNORE_CHUNK = {"<|im_end|>"}
 
@@ -66,7 +67,7 @@ class ChatHandler:
 
         embeddings = OllamaEmbeddings(model=MODEL_NAME)
         vectorDb = FAISS.load_local(INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
-        retriever = vectorDb.as_retriever()
+        retriever = vectorDb.as_retriever(search_kwargs={"k": self.MAX_CONTEXT_SIZE})
 
         # prompt = ChatPromptTemplate.from_messages([
         #     ("system", self.SYSTEM_MESSAGE),
