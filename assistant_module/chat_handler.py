@@ -107,7 +107,7 @@ class ChatHandler:
         streamer.flush_and_speak()
         streamer.stop()
 
-        if output.startswith("AI:"):
+        if output.startswith("AI:"): 
             output = output[3:]
 
         # Update history
