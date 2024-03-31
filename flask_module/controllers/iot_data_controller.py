@@ -1,16 +1,22 @@
 from flask import Blueprint, request, jsonify
 from flask_module.models import db, IoTData
+from datetime import datetime
 
 bp = Blueprint('iot_data', __name__, url_prefix='/iot_data')
 
 @bp.route('/', methods=['POST'])
 def create_iot_data():
     data = request.json
+    # Convert the time string to a datetime object
+    time_str = data.get('time')
+    time_obj = datetime.fromisoformat(time_str) if time_str else None
+
     new_data = IoTData(
         topic=data['topic'],
         unit=data['unit'],
         location=data['location'],
-        data=data['data']
+        data=data['data'],
+        time=time_obj  # Use the converted datetime object
     )
     db.session.add(new_data)
     db.session.commit()

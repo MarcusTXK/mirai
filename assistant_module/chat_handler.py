@@ -9,11 +9,13 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain.chains import create_history_aware_retriever
-from config import INDEX_PATH, MODEL_NAME
-from flask_module.models import db, Chatlog
+from config import INDEX_PATH, IOT_DEVICES, IS_USE_IOT_DATA, MODEL_NAME
+from flask_module.models import db, Chatlog, IoTData
 from assistant_module.speech_streamer import SpeechStreamer
 from langchain_core.callbacks import StdOutCallbackHandler
 import langchain 
+import json
+
 langchain.debug = True 
 
 class ChatHandler:
@@ -62,6 +64,26 @@ class ChatHandler:
         streamer.flush_and_speak()
         streamer.stop()
         return output
+    
+    def get_iot_data(self):
+        if not IS_USE_IOT_DATA:
+            return ""
+
+        # Fetch the latest data for each IoT device
+        device_messages = []
+        with self.app.app_context():
+            for device in IOT_DEVICES:
+                latest_data = IoTData.query.filter_by(topic=device.topic).order_by(IoTData.time.desc()).first()
+                if latest_data:
+                    data_str = json.dumps(latest_data.data).replace("{", "{{").replace("}", "}}")
+                    message = f"{device.topic}: {data_str} {device.unit} in {device.location}"
+                    device_messages.append(message)
+
+        # Append device messages to the system message
+        additional_context = "\n".join(device_messages) 
+        print("additional_context", additional_context)
+        return "\nIOT Sensor data that might be helpful: \n" + additional_context
+
 
     def send_chat(self, user_input):
 
@@ -69,18 +91,8 @@ class ChatHandler:
         vectorDb = FAISS.load_local(INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
         retriever = vectorDb.as_retriever(search_kwargs={"k": self.MAX_CONTEXT_SIZE})
 
-        # prompt = ChatPromptTemplate.from_messages([
-        #     ("system", self.SYSTEM_MESSAGE),
-        #     MessagesPlaceholder(variable_name="chat_history"),
-        #     ("user", """<context>
-        #      {context}
-        #      </context>
-             
-        #      User: {input}""")
-        # ])
-
         prompt = ChatPromptTemplate.from_messages([
-            ("system", self.SYSTEM_MESSAGE + " Below is some context that might be helpful:\n\n{context}"),
+            ("system", self.SYSTEM_MESSAGE + " Below is some context that might be helpful:\n\n{context}" + self.get_iot_data()),
             MessagesPlaceholder(variable_name="chat_history"),
             ("user", "{input}"),
         ])

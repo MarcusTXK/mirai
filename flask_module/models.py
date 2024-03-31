@@ -22,6 +22,6 @@ class IoTData(db.Model):
     unit = db.Column(db.String(255), nullable=False)
     location = db.Column(db.String(255), nullable=False)
     data = db.Column(db.JSON, nullable=False)
+    time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
     updatedAt = db.Column(db.DateTime, onupdate=datetime.utcnow)
-    

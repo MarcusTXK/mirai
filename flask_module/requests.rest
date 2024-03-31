@@ -54,3 +54,45 @@ GET http://localhost:5000/chatlog/
 Accept: application/json
 
 ###
+
+### Seed IoT Data 1
+POST http://localhost:5000/iot_data/
+Content-Type: application/json
+
+{
+  "topic": "esp32-dht22/TEMP_1",
+  "unit": "°C",
+  "location": "Kitchen",
+  "data": {"value": 26},
+  "time": "2024-04-01T14:00:00"
+}
+
+###
+
+### Seed IoT Data 2
+POST http://localhost:5000/iot_data/
+Content-Type: application/json
+
+{
+  "topic": "esp32-dht22/HUMIDITY_1",
+  "unit": "g/kg",
+  "location": "Kitchen",
+  "data": {"value": 10},
+  "time": "2024-04-01T14:05:00"
+}
+
+###
+
+### Seed IoT Data 3
+POST http://localhost:5000/iot_data/
+Content-Type: application/json
+
+{
+  "topic": "esp32-dht22/TEMP_2",
+  "unit": "°C",
+  "location": "Living Room",
+  "data": {"value": 22},
+  "time": "2024-04-01T14:10:00"
+}
+
+###
