@@ -2,6 +2,7 @@ from flask import Flask
 from flask_module.models import db
 import flask_module.controllers.preferences_controller as preferences
 import flask_module.controllers.chatlog_controller as chatlog
+import flask_module.controllers.iot_data_controller as iot_data
 
 def create_app():
     app = Flask(__name__)
@@ -11,10 +12,8 @@ def create_app():
     
     with app.app_context():
         db.create_all()
-
-    from flask_module.controllers.preferences_controller import bp as preferences_bp
-    from flask_module.controllers.chatlog_controller import bp as chatlog_bp
-    app.register_blueprint(preferences_bp)
-    app.register_blueprint(chatlog_bp)
+    app.register_blueprint(preferences.bp)
+    app.register_blueprint(chatlog.bp)
+    app.register_blueprint(iot_data.bp)
 
     return app

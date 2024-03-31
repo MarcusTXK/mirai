@@ -13,10 +13,6 @@ app = create_app()
 def run_app():
     app.run()
 
-def on_mqtt_message(client, userdata, msg):
-    # Process MQTT messages here
-    pass
-
 blank_audio_regex = r"\[[^\]]*\]| \([^)]*\)"
 
 def should_ignore_user_input(user_input):
@@ -36,7 +32,7 @@ def should_ignore_user_input(user_input):
 
 
 def main():
-    mqtt_client = MQTTClient(on_message_callback=on_mqtt_message)
+    mqtt_client = MQTTClient(app)
     chat_handler = ChatHandler(app)
 
     # Connect and start the MQTT client
@@ -62,7 +58,7 @@ def main():
 
     # Main application loop
     try:
-        my_assistant = WhisperAssistant(commands_callback=parse_audio, n_threads=8, model='base.en')    
+        my_assistant = WhisperAssistant(commands_callback=parse_audio, n_threads=8, model='small.en')    
         my_assistant.start()
     finally:
         mqtt_client.stop()

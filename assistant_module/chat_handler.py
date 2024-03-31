@@ -92,14 +92,25 @@ class ChatHandler:
     
         # stream output
         output = ""
+        isFirstChunk = True
+        isSkipNext = False
         streamer = SpeechStreamer()
         for chunk in retrieval_chain.stream({"input": user_input, "chat_history": self.history}):
             # print("chunk:", chunk)
+
+            if isSkipNext:
+                isSkipNext = False
+                continue
 
             if (not "answer" in chunk):
                 continue
             text = chunk["answer"]
             print("text: ", text)
+            if isFirstChunk and text.endswith("AI"):
+                isSkipNext = True
+                continue
+
+            isFirstChunk = False
             if any(text.endswith(ignore) for ignore in self.IGNORE_CHUNK):
                 continue
             streamer.process_and_speak(text)
@@ -108,8 +119,8 @@ class ChatHandler:
         streamer.flush_and_speak()
         streamer.stop()
 
-        if output.startswith("AI:"): 
-            output = output[3:]
+        if output.startswith(" AI:"): 
+            output = output[4:]
 
         # Update history
         self.save_message("user", user_input)
