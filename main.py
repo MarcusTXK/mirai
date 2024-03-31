@@ -1,6 +1,6 @@
 from threading import Thread
 from assistant_module.whisper_assistant import WhisperAssistant
-from config import IS_USE_TOOLS, USER_NAME, WAKE_WORD
+from config import IS_USE_TOOLS, USER_NAME, WAKE_WORD, WHISPER_MODEL
 from flask_module.app import create_app
 from mqtt_module.mqtt_client import MQTTClient
 from assistant_module.chat_handler import ChatHandler
@@ -51,14 +51,13 @@ def main():
         try:
             resp = chat_handler.send_chat(user_input)
             print("resp", resp)
-            # speech.speak(resp)
-            # client.publish(SUBTOPIC_LED, "on" if state.light == 1 else "off")
+            # In future, use tools here
         except Exception as e:
             print(e)
 
     # Main application loop
     try:
-        my_assistant = WhisperAssistant(commands_callback=parse_audio, n_threads=8, model='small.en')    
+        my_assistant = WhisperAssistant(commands_callback=parse_audio, n_threads=8, model=WHISPER_MODEL)    
         my_assistant.start()
     finally:
         mqtt_client.stop()

@@ -19,3 +19,7 @@ USER_NAME = "Marcus"
 WAKE_WORD = "" # Experimental, not recommended to set
 MODEL_NAME = "mistral-openorca:7b-q5_K_M"
 INDEX_PATH = "./instance/preferences_index"
+
+
+# Config for whisper
+WHISPER_MODEL = ""
