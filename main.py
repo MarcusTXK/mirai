@@ -55,7 +55,9 @@ def main():
     def parse_audio(user_input): 
         print("user_input: ", user_input)
         if should_ignore_user_input(user_input):
+            print("ignoring input")
             return
+        print("processing input")
         try:
             resp = llm_handler.send_chat(user_input)
             print("resp", resp)
@@ -65,7 +67,7 @@ def main():
 
     # Main application loop
     try:
-        my_assistant = WhisperAssistant(commands_callback=parse_audio, n_threads=8, model=WHISPER_MODEL)    
+        my_assistant = WhisperAssistant(commands_callback=parse_audio, n_threads=4, model=WHISPER_MODEL)    
         my_assistant.start()
     finally:
         mqtt_client.stop()

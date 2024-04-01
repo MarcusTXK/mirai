@@ -11,7 +11,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from sqlalchemy import asc, desc
-from config import INDEX_PATH, IOT_DEVICES, IS_DEBUG, IS_USE_HISTORY, IS_USE_IOT_DATA, MAX_CONTEXT_SIZE, MAX_HISTORY_SIZE, MODEL_NAME, SCHEDULED_INDEXING_MODEL_NAME
+from config import INDEX_PATH, IOT_DEVICES, IS_DEBUG, IS_USE_CONTEXT, IS_USE_HISTORY, IS_USE_IOT_DATA, MAX_CONTEXT_SIZE, MAX_HISTORY_SIZE, MODEL_NAME, SCHEDULED_INDEXING_MODEL_NAME
 from flask_module.controllers.preferences_controller import generate_index
 from flask_module.models import ChatParticipant, Preference, db, Chatlog, IoTData
 from assistant_module.speech_streamer import SpeechStreamer
@@ -121,20 +121,23 @@ class LLMHandler:
 
 
     def send_chat(self, user_input):
-        embeddings = OllamaEmbeddings(model=MODEL_NAME)
-        vectorDb = FAISS.load_local(INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
-        retriever = vectorDb.as_retriever(search_kwargs={"k": MAX_CONTEXT_SIZE})
+        context = "{context}" if IS_USE_CONTEXT else ""
+        context_message = " Below is some context that might be helpful:\n\n" if IS_USE_CONTEXT or IS_USE_IOT_DATA else ""
 
         prompt = ChatPromptTemplate.from_messages([
-            (ChatParticipant.SYSTEM.value, self.SYSTEM_MESSAGE + " Below is some context that might be helpful:\n\n{context}" + self.get_iot_data()),
+            (ChatParticipant.SYSTEM.value, self.SYSTEM_MESSAGE + context_message + context + self.get_iot_data()),
             MessagesPlaceholder(variable_name="chat_history"),
             (ChatParticipant.USER.value, "{input}"),
         ])
-        document_chain = create_stuff_documents_chain(self.llm, prompt)
 
-        retrieval_chain = create_retrieval_chain(retriever, document_chain)
-
-        # history_retriever_chain = create_history_aware_retriever(self.llm, retrieval_chain, prompt)
+        if IS_USE_CONTEXT:
+            embeddings = OllamaEmbeddings(model=MODEL_NAME)
+            vectorDb = FAISS.load_local(INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
+            retriever = vectorDb.as_retriever(search_kwargs={"k": MAX_CONTEXT_SIZE})
+            document_chain = create_stuff_documents_chain(self.llm, prompt)
+            retrieval_chain = create_retrieval_chain(retriever, document_chain)
+        else:
+            retrieval_chain = prompt | self.llm           
     
         # stream output
         output = ""
@@ -149,9 +152,9 @@ class LLMHandler:
                 isSkipNext = False
                 continue
 
-            if (not "answer" in chunk):
+            if (IS_USE_CONTEXT and not "answer" in chunk):
                 continue
-            text = chunk["answer"]
+            text = chunk["answer"] if IS_USE_CONTEXT else chunk
             print("text: ", text)
             if isFirstChunk and text.endswith("AI"):
                 isSkipNext = True
