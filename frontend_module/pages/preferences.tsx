@@ -1,4 +1,4 @@
-import { PreferenceDTO } from "@/constants/interfaces";
+import { ChatParticipant, PreferenceDTO } from "@/constants/interfaces";
 import { usePreferences } from "@/hooks/usePreferences";
 import {
   Box,
@@ -16,7 +16,6 @@ import {
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
-import dynamic from "next/dynamic";
 import PreferenceModal from "@/components/PreferenceModal";
 import { formatDate } from "@/utils/utils";
 
@@ -50,7 +49,7 @@ export default function PreferencesPage() {
       "/preferences" +
       (currentPreference ? `/${currentPreference.id}` : "/");
     const method = currentPreference ? "PUT" : "POST";
-    values.updatedBy = "User";
+    values.updatedBy = ChatParticipant.USER;
     try {
       const response = await fetch(url, {
         method: method,

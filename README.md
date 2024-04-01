@@ -27,8 +27,9 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 systemctl stop ollama
 sudo ollama serve
-# on a seperate terminal
+# on a seperate terminal, you may chose to pull others based on your config
 ollama pull mistral-openorca:7b-q5_K_M
+ollama pull solar:10.7b-instruct-v1-q5_K_M
 ```
 
 ### [Optional] Frontend setup

@@ -11,15 +11,19 @@ IOT_DEVICES = [
 ]
 
 # Config for LLM
+IS_DEBUG = True
 IS_USE_TOOLS = False
 IS_USE_CONTEXT = False
+IS_USE_HISTORY = False
 IS_USE_IOT_DATA = True
 USER_NAME = "Marcus"
 WAKE_WORD = "" # Experimental, not recommended to set
 MODEL_NAME = "mistral-openorca:7b-q5_K_M"
 INDEX_PATH = "./instance/preferences_index"
-# Daily time to schedule analyzing of data and creating new preference. Set when asleep
-DAILY_SCHEDULED_INDEXING = "0300" 
+
+# Config for scheduling of analysing preferences
+SCHEDULED_INDEXING_MODEL_NAME = "solar:10.7b-instruct-v1-q5_K_M" # Recommended to use a larger model as not as time sensitive and has better output
+DAILY_SCHEDULED_INDEXING = "0300" # Daily time to schedule analyzing of data and creating new preference. Leave blank to disable.
 
 # Config for whisper
 WHISPER_MODEL = "small.en"

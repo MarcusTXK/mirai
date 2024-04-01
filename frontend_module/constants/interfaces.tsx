@@ -1,6 +1,6 @@
 export interface CreatePreferenceDTO {
   description: string;
-  updatedBy: string;
+  updatedBy: ChatParticipant;
 }
 
 export interface CreateChatlogDTO {
@@ -13,13 +13,13 @@ export interface PreferenceDTO {
   description: string;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
-  updatedBy: string;
+  updatedBy: ChatParticipant;
 }
 
 export interface ChatlogDTO {
   id: number;
   time: string; // ISO date string
-  sentBy: string;
+  sentBy: ChatParticipant;
   message: string;
 }
 
@@ -42,3 +42,9 @@ export interface IoTDataDTO {
 export type PreferencesResponse = PaginationResponse<PreferenceDTO>;
 export type ChatlogsResponse = PaginationResponse<ChatlogDTO>;
 export type IoTDataResponse = PaginationResponse<IoTDataDTO>;
+
+export enum ChatParticipant {
+  USER = "user",
+  ASSISTANT = "assistant",
+  SYSTEM = "system",
+}

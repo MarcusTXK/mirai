@@ -1,7 +1,15 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from enum import Enum
 
 db = SQLAlchemy()
+
+
+class ChatParticipant(Enum):
+    USER = 'user'
+    ASSISTANT = 'assistant'
+    SYSTEM = 'system'
+
 
 class Preference(db.Model):
     id = db.Column(db.Integer, primary_key=True)

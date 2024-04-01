@@ -3,7 +3,7 @@ from assistant_module.whisper_assistant import WhisperAssistant
 from config import DAILY_SCHEDULED_INDEXING, IS_USE_TOOLS, USER_NAME, WAKE_WORD, WHISPER_MODEL
 from flask_module.app import create_app
 from mqtt_module.mqtt_client import MQTTClient
-from assistant_module.chat_handler import ChatHandler
+from assistant_module.llm_handler import LLMHandler
 from assistant_module.global_state_manager import global_state_manager
 from assistant_module.speech_streamer import SpeechStreamer
 from utils.scheduler import run_scheduler, schedule_task
@@ -31,14 +31,10 @@ def should_ignore_user_input(user_input):
     
     return False
 
-def update_preference_index():
-    #placeholder fn to run in schedule
-    return
-
 
 def main():
     mqtt_client = MQTTClient(app)
-    chat_handler = ChatHandler(app)
+    llm_handler = LLMHandler(app)
 
     # Connect and start the MQTT client
     mqtt_client.connect()
@@ -47,19 +43,21 @@ def main():
     speech_streamer = SpeechStreamer()
     speech_streamer.stream_speech("Starting up. Please wait.")
     speech_streamer.stop(False)
-    schedule_task(DAILY_SCHEDULED_INDEXING, update_preference_index)
-    # Start the scheduler in a separate thread
-    scheduler_thread = Thread(target=run_scheduler)
-    scheduler_thread.start()
+
+    if DAILY_SCHEDULED_INDEXING:
+        schedule_task(DAILY_SCHEDULED_INDEXING, llm_handler.update_preference_index)
+        # Start the scheduler in a separate thread
+        scheduler_thread = Thread(target=run_scheduler)
+        scheduler_thread.start()
     
-    chat_handler.send_initial_chat("Hi, my name is " + USER_NAME )
+    llm_handler.send_initial_chat("Hi, my name is " + USER_NAME )
 
     def parse_audio(user_input): 
         print("user_input: ", user_input)
         if should_ignore_user_input(user_input):
             return
         try:
-            resp = chat_handler.send_chat(user_input)
+            resp = llm_handler.send_chat(user_input)
             print("resp", resp)
             # In future, use tools here
         except Exception as e:

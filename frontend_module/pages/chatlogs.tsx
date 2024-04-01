@@ -22,6 +22,7 @@ import {
   IconChevronsRight,
 } from "@tabler/icons-react";
 import { formatDate } from "@/utils/utils";
+import { ChatParticipant } from "@/constants/interfaces";
 
 const ChatLogsPage: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -47,8 +48,8 @@ const ChatLogsPage: React.FC = () => {
         <Box bg="cyan" p={8} style={{ borderRadius: "5px" }}>
           <Stack>
             <Text size="sm">{formatDate(log.time)}</Text>
-            <Text>{log.message}</Text>{" "}
-          </Stack>{" "}
+            <Text>{log.message}</Text>
+          </Stack>
         </Box>
       </Flex>
     );
@@ -60,8 +61,8 @@ const ChatLogsPage: React.FC = () => {
         <Box bg="green" p={8} style={{ borderRadius: "5px" }}>
           <Stack>
             <Text size="sm">{formatDate(log.time)}</Text>
-            <Text>{log.message}</Text>{" "}
-          </Stack>{" "}
+            <Text>{log.message}</Text>
+          </Stack>
         </Box>
         <Avatar color="green" radius="xl" mx={16}>
           You
@@ -77,7 +78,9 @@ const ChatLogsPage: React.FC = () => {
       <Title>Chat Logs</Title>
       <Stack mt={20}>
         {reversedChatlog?.map((log) =>
-          log.sentBy === "assistant" ? getAIMessage(log) : getUserMessage(log),
+          log.sentBy === ChatParticipant.ASSISTANT
+            ? getAIMessage(log)
+            : getUserMessage(log),
         )}
       </Stack>
       <Center>
