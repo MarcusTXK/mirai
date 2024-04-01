@@ -6,11 +6,13 @@ import {
   Card,
   Center,
   Container,
+  Flex,
   Group,
   Modal,
   Pagination,
   Stack,
   Text,
+  Title,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useSWRConfig } from "swr";
@@ -92,11 +94,12 @@ export default function PreferencesPage() {
   return (
     <Container>
       <Stack>
-        <Box>
+        <Flex justify="space-between" mb={20}>
+          <Title>Preferences</Title>
           <Button style={{ float: "right" }} onClick={openAddModal}>
             Add Preference
           </Button>
-        </Box>
+        </Flex>
         {preferences &&
           preferences.map((pref) => (
             <Card key={pref.id} shadow="sm" padding="lg" radius="md" withBorder>

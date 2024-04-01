@@ -7,6 +7,7 @@ import {
   Group,
   MantineProvider,
   NavLink,
+  Text,
   Title,
   useMantineColorScheme,
 } from "@mantine/core";
@@ -21,10 +22,18 @@ import {
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ColorSchemeToggle } from "@/components/ColorSchemeToggle/ColorSchemeToggle";
+import { usePathname } from "next/navigation";
+
+export const ROUTES = [
+  { path: "/", label: "Home", icon: <IconHome2 /> },
+  { path: "/preferences", label: "Preferences", icon: <IconUserCircle /> },
+  { path: "/chatlogs", label: "Chat Logs", icon: <IconMessageDots /> },
+];
 
 export default function App({ Component, pageProps }: AppProps) {
   const [opened, { toggle }] = useDisclosure();
   const router = useRouter();
+  const pathname = usePathname();
 
   return (
     <MantineProvider theme={theme}>
@@ -58,28 +67,30 @@ export default function App({ Component, pageProps }: AppProps) {
               href={"/"}
               style={{ textDecoration: "none", color: "inherit" }}
             >
-              <Title>Mirai</Title>
+              <Title>
+                <Text
+                  inherit
+                  variant="gradient"
+                  gradient={{ from: "blue", to: "green" }}
+                >
+                  Mirai
+                </Text>
+              </Title>
             </Link>
             <ColorSchemeToggle />
           </Flex>
         </AppShell.Header>
 
         <AppShell.Navbar p="lg">
-          <NavLink
-            onClick={() => router.push("/")}
-            label="Home"
-            leftSection={<IconHome2 />}
-          />
-          <NavLink
-            onClick={() => router.push("/preferences")}
-            label="Preferences"
-            leftSection={<IconUserCircle />}
-          />
-          <NavLink
-            onClick={() => router.push("/chatlogs")}
-            label="Chat Logs"
-            leftSection={<IconMessageDots />}
-          />
+          {ROUTES.map(({ path, label, icon }) => (
+            <NavLink
+              key={path}
+              onClick={() => router.push(path)}
+              label={label}
+              leftSection={icon}
+              active={pathname === path}
+            />
+          ))}
         </AppShell.Navbar>
 
         <AppShell.Main>

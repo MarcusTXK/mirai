@@ -12,6 +12,7 @@ import {
   Pill,
   Badge,
   Flex,
+  Title,
 } from "@mantine/core";
 import { useChatLogs } from "../hooks/useChatLogs"; // Adjust the import path as necessary
 import {
@@ -71,7 +72,8 @@ const ChatLogsPage: React.FC = () => {
 
   return (
     <Container>
-      <Stack>
+      <Title>Chat Logs</Title>
+      <Stack mt={20}>
         {chatlog?.map((log) =>
           log.sentBy === "assistant" ? getAIMessage(log) : getUserMessage(log),
         )}
