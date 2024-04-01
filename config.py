@@ -1,6 +1,5 @@
 from mqtt_module.iot_device import IoTDevice\
 
-
 # Config for MQTT
 MQTT_SERVER = "mqtt.eclipseprojects.io"
 CLIENTID = "esp32-dht22-clientId-cdf7"
@@ -19,7 +18,8 @@ USER_NAME = "Marcus"
 WAKE_WORD = "" # Experimental, not recommended to set
 MODEL_NAME = "mistral-openorca:7b-q5_K_M"
 INDEX_PATH = "./instance/preferences_index"
-
+# Daily time to schedule analyzing of data and creating new preference. Set when asleep
+DAILY_SCHEDULED_INDEXING = "0300" 
 
 # Config for whisper
 WHISPER_MODEL = "small.en"
