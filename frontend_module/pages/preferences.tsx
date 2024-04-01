@@ -28,7 +28,9 @@ export default function PreferencesPage() {
 
   const { preferences, totalPages, isLoading, isError } =
     usePreferences(currentPage);
-  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+  const API_URL =
+    process.env.REACT_APP_API_URL ||
+    window.location.origin.replace(":3000", ":5000");
 
   // Modal state
   const [isModalOpen, setModalOpen] = useState(false);

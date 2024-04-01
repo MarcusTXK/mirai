@@ -1,13 +1,24 @@
-import useSWR from 'swr';
-import { useState } from 'react';
-import { PreferencesResponse } from '@/constants/interfaces';
+import useSWR from "swr";
+import { useEffect, useState } from "react";
+import { PreferencesResponse } from "@/constants/interfaces";
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function usePreferences(page: number, pageSize: number = 10) {
-  const { data, error } = useSWR<PreferencesResponse>(`${API_URL}/preferences?page=${page}&size=${pageSize}`, fetcher);
+  const [apiUrl, setApiUrl] = useState<string>("");
+
+  useEffect(() => {
+    // This code runs only in the browser, where `window` is defined
+    const baseURL =
+      process.env.REACT_APP_API_URL ||
+      window.location.origin.replace(":3000", ":5000");
+    setApiUrl(baseURL);
+  }, []);
+
+  const { data, error } = useSWR<PreferencesResponse>(
+    apiUrl ? `${apiUrl}/preferences?page=${page}&size=${pageSize}` : null,
+    fetcher,
+  );
 
   return {
     preferences: data?.data,

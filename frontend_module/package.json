@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0",
     "build": "next build",
     "analyze": "ANALYZE=true next build",
-    "start": "next start",
+    "start": "next start -H 0.0.0.0",
     "export": "next build && next export",
     "typecheck": "tsc --noEmit",
     "lint": "next lint && npm run lint:stylelint",

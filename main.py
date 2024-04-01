@@ -11,7 +11,7 @@ import re
 app = create_app()
 
 def run_app():
-    app.run()
+    app.run(host='0.0.0.0')
 
 blank_audio_regex = r"\[[^\]]*\]| \([^)]*\)"
 
