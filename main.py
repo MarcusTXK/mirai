@@ -30,6 +30,10 @@ def should_ignore_user_input(user_input):
     
     return False
 
+def update_preference_index():
+    #placeholder fn to run in schedule
+    return
+
 
 def main():
     mqtt_client = MQTTClient(app)
