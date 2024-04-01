@@ -31,9 +31,11 @@ sudo ollama serve
 ollama pull mistral-openorca:7b-q5_K_M
 ```
 
-### [Optional] Frontend setup 
+### [Optional] Frontend setup
+
 If you want a frontend client UI, you will need nodeJS and yarn
 Install Dependencies
+
 ```
 # installs NVM (Node Version Manager)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
@@ -54,6 +56,24 @@ cd frontend_module
 npm install
 npm run dev
 ```
+
+To access on other devices
+
+```
+sudo ufw allow 5000
+sudo ufw allow 3000
+
+# Setup Zeroconf
+sudo apt-get install avahi-daemon
+sudo systemctl enable avahi-daemon
+sudo systemctl start avahi-daemon
+sudo ufw allow 5353/udp
+
+# Now you can access on other devices on your network via <hostname_here>.local:300, where hostname is from the command below
+hostname
+```
+
+Windows supports Zeroconf networking through a service called Bonjour
 
 ### Commands to run for esp32-S3
 
