@@ -27,8 +27,18 @@ def create_iot_data():
 def get_iot_data():
     page = request.args.get('page', 1, type=int)
     size = request.args.get('size', 10, type=int)
-    pagination = IoTData.query.order_by(desc(IoTData.time)).paginate(page=page, per_page=size, error_out=False)
+    topic_filter = request.args.get('topic', None)
+
+    query = IoTData.query
+
+    if topic_filter:
+        # Use the % wildcard to allow for partial matches before and after the topic_filter value
+        query = query.filter(IoTData.topic.like(f'%{topic_filter}%'))
+    
+    # Order by descending time and paginate the query
+    pagination = query.order_by(desc(IoTData.time)).paginate(page=page, per_page=size, error_out=False)
     all_data = pagination.items
+
     return jsonify({
         'data': [d.to_dict() for d in all_data],
         'total_pages': pagination.pages,

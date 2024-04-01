@@ -15,6 +15,7 @@ import { theme } from "../theme";
 import { AppShell, Burger } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import {
+  IconBinaryTree2,
   IconHome2,
   IconMessageDots,
   IconUserCircle,
@@ -28,6 +29,7 @@ export const ROUTES = [
   { path: "/", label: "Home", icon: <IconHome2 /> },
   { path: "/preferences", label: "Preferences", icon: <IconUserCircle /> },
   { path: "/chatlogs", label: "Chat Logs", icon: <IconMessageDots /> },
+  { path: "/iotdata", label: "IoT Data Logs", icon: <IconBinaryTree2 /> },
 ];
 
 export default function App({ Component, pageProps }: AppProps) {

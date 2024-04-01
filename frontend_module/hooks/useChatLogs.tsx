@@ -1,8 +1,7 @@
 import useSWR from "swr";
 import { ChatlogsResponse } from "@/constants/interfaces";
 import { useEffect, useState } from "react";
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { fetcher } from "@/utils/utils";
 
 export function useChatLogs(page: number, pageSize: number = 10) {
   const [apiUrl, setApiUrl] = useState<string>("");

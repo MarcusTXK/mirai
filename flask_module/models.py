@@ -42,3 +42,15 @@ class IoTData(db.Model):
     time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     createdAt = db.Column(db.DateTime, default=datetime.utcnow)
     updatedAt = db.Column(db.DateTime, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'topic': self.topic,
+            'unit': self.unit,
+            'location': self.location,
+            'data': self.data,
+            'time': self.time.isoformat() if self.time else None,
+            'createdAt': self.createdAt.isoformat() if self.createdAt else None,
+            'updatedAt': self.updatedAt.isoformat() if self.updatedAt else None,
+        }

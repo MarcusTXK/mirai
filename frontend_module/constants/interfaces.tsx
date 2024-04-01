@@ -28,5 +28,17 @@ export interface PaginationResponse<T> {
   total_pages: number;
 }
 
+export interface IoTDataDTO {
+  id: number;
+  topic: string;
+  unit: string;
+  location: string;
+  data: any; // raw json
+  time: string; // ISO date string
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+}
+
 export type PreferencesResponse = PaginationResponse<PreferenceDTO>;
 export type ChatlogsResponse = PaginationResponse<ChatlogDTO>;
+export type IoTDataResponse = PaginationResponse<IoTDataDTO>;

@@ -1,8 +1,7 @@
 import useSWR from "swr";
 import { useEffect, useState } from "react";
 import { PreferencesResponse } from "@/constants/interfaces";
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { fetcher } from "@/utils/utils";
 
 export function usePreferences(page: number, pageSize: number = 10) {
   const [apiUrl, setApiUrl] = useState<string>("");
