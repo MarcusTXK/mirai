@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from sqlalchemy import desc
 from flask_module.models import db, IoTData
 from datetime import datetime
 
@@ -26,7 +27,7 @@ def create_iot_data():
 def get_iot_data():
     page = request.args.get('page', 1, type=int)
     size = request.args.get('size', 10, type=int)
-    pagination = IoTData.query.order_by(IoTData.time.desc()).paginate(page=page, per_page=size, error_out=False)
+    pagination = IoTData.query.order_by(desc(IoTData.time)).paginate(page=page, per_page=size, error_out=False)
     all_data = pagination.items
     return jsonify({
         'data': [d.to_dict() for d in all_data],

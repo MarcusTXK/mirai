@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from sqlalchemy import desc
 from config import INDEX_PATH, MODEL_NAME
 from flask_module.models import db, Preference
 from langchain_community.vectorstores import FAISS
@@ -20,7 +21,7 @@ def create_preference():
 def get_preferences():
     page = request.args.get('page', 1, type=int)
     size = request.args.get('size', 10, type=int)
-    pagination = Preference.query.order_by(Preference.updatedAt.desc()).paginate(page=page, per_page=size, error_out=False)
+    pagination = Preference.query.order_by(desc(Preference.updatedAt)).paginate(page=page, per_page=size, error_out=False)
     return jsonify({
         'data': [p.to_dict() for p in pagination.items],
         'total_pages': pagination.pages,

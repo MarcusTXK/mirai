@@ -22,15 +22,21 @@ import { formatDate } from "@/utils/utils";
 
 export default function PreferencesPage() {
   const [isClient, setIsClient] = useState(false);
+  const [apiUrl, setApiUrl] = useState<string>("");
+
+  useEffect(() => {
+    // This code runs only in the browser, where `window` is defined
+    const baseURL =
+      process.env.REACT_APP_API_URL ||
+      window.location.origin.replace(":3000", ":5000");
+    setApiUrl(baseURL);
+  }, []);
 
   const { mutate } = useSWRConfig();
   const [currentPage, setCurrentPage] = useState(1);
 
   const { preferences, totalPages, isLoading, isError } =
     usePreferences(currentPage);
-  const API_URL =
-    process.env.REACT_APP_API_URL ||
-    window.location.origin.replace(":3000", ":5000");
 
   // Modal state
   const [isModalOpen, setModalOpen] = useState(false);
@@ -40,7 +46,7 @@ export default function PreferencesPage() {
 
   const handleSave = async (values: any) => {
     const url =
-      API_URL +
+      apiUrl +
       "/preferences" +
       (currentPreference ? `/${currentPreference.id}` : "/");
     const method = currentPreference ? "PUT" : "POST";
@@ -55,7 +61,7 @@ export default function PreferencesPage() {
       if (!response.ok) throw new Error("Network response was not ok");
 
       setModalOpen(false); // Close the modal
-      mutate(`${API_URL}/preferences?page=${currentPage}&size=10`);
+      mutate(`${apiUrl}/preferences?page=${currentPage}&size=10`);
       // Optionally, fetch preferences again or update local state to reflect the change
     } catch (error) {
       console.error("There was a problem with your fetch operation:", error);
@@ -66,13 +72,13 @@ export default function PreferencesPage() {
     if (!confirm("Are you sure you want to delete this preference?")) return;
 
     try {
-      const response = await fetch(`${API_URL}/preferences/${id}`, {
+      const response = await fetch(`${apiUrl}/preferences/${id}`, {
         method: "DELETE",
       });
 
       if (!response.ok) throw new Error("Network response was not ok");
 
-      mutate(`${API_URL}/preferences?page=${currentPage}&size=10`);
+      mutate(`${apiUrl}/preferences?page=${currentPage}&size=10`);
     } catch (error) {
       console.error("There was a problem with your fetch operation:", error);
     }

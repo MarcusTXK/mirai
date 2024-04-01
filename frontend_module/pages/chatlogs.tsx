@@ -74,9 +74,13 @@ const ChatLogsPage: React.FC = () => {
     <Container>
       <Title>Chat Logs</Title>
       <Stack mt={20}>
-        {chatlog?.map((log) =>
-          log.sentBy === "assistant" ? getAIMessage(log) : getUserMessage(log),
-        )}
+        {chatlog
+          ?.reverse()
+          .map((log) =>
+            log.sentBy === "assistant"
+              ? getAIMessage(log)
+              : getUserMessage(log),
+          )}
       </Stack>
       <Center>
         <Group mt="md">

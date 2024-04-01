@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from sqlalchemy import desc
 from flask_module.models import db, Chatlog
 
 bp = Blueprint('chatlog', __name__, url_prefix='/chatlog')
@@ -15,7 +16,7 @@ def create_chatlog():
 def get_chatlogs():
     page = request.args.get('page', 1, type=int)
     size = request.args.get('size', 10, type=int)
-    pagination = Chatlog.query.order_by(Chatlog.time.desc()).paginate(page=page, per_page=size, error_out=False)
+    pagination = Chatlog.query.order_by(desc(Chatlog.time)).paginate(page=page, per_page=size, error_out=False)
     return jsonify({
         'data': [chat.to_dict() for chat in pagination.items],
         'total_pages': pagination.pages,
