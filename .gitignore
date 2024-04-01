@@ -164,3 +164,8 @@ cython_debug/
 models/
 
 .vscode/
+
+# frontend
+.next/
+.yarn/
+node_modules/

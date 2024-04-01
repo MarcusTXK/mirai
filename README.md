@@ -31,6 +31,30 @@ sudo ollama serve
 ollama pull mistral-openorca:7b-q5_K_M
 ```
 
+### [Optional] Frontend setup 
+If you want a frontend client UI, you will need nodeJS and yarn
+Install Dependencies
+```
+# installs NVM (Node Version Manager)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+# download and install Node.js
+nvm install 20
+
+# verifies the right Node.js version is in the environment
+node -v # should print `v20.12.0`
+
+# verifies the right NPM version is in the environment
+npm -v # should print `10.5.0`
+```
+
+```
+cd frontend_module
+# install dependencies
+npm install
+npm run dev
+```
+
 ### Commands to run for esp32-S3
 
 ```

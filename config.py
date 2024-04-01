@@ -22,4 +22,4 @@ INDEX_PATH = "./instance/preferences_index"
 
 
 # Config for whisper
-WHISPER_MODEL = ""
+WHISPER_MODEL = "small.en"
