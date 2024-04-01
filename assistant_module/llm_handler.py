@@ -11,7 +11,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from sqlalchemy import asc, desc
-from config import INDEX_PATH, IOT_DEVICES, IS_USE_HISTORY, IS_USE_IOT_DATA, MODEL_NAME, SCHEDULED_INDEXING_MODEL_NAME
+from config import INDEX_PATH, IOT_DEVICES, IS_DEBUG, IS_USE_HISTORY, IS_USE_IOT_DATA, MAX_CONTEXT_SIZE, MAX_HISTORY_SIZE, MODEL_NAME, SCHEDULED_INDEXING_MODEL_NAME
 from flask_module.controllers.preferences_controller import generate_index
 from flask_module.models import ChatParticipant, Preference, db, Chatlog, IoTData
 from assistant_module.speech_streamer import SpeechStreamer
@@ -26,11 +26,9 @@ class Observations(BaseModel):
     observation: List[str] = Field(description="Observation from that will be VERY useful to an assistant")
 
 
-langchain.debug = True 
+langchain.debug = IS_DEBUG 
 
 class LLMHandler:
-    MAX_HISTORY_SIZE = 2
-    MAX_CONTEXT_SIZE = 2
     SYSTEM_MESSAGE = "You are a helpful home assistant. Think before writing and output the response you would like to speak to the user."
     IGNORE_CHUNK = {"<|im_end|>"}
 
@@ -42,7 +40,7 @@ class LLMHandler:
     def load_recent_chats(self):
         with self.app.app_context():
             # Fetch the 4 most recent chat logs from the database
-            recent_chats = Chatlog.query.order_by(Chatlog.id.desc()).limit(self.MAX_HISTORY_SIZE).all()
+            recent_chats = Chatlog.query.order_by(Chatlog.id.desc()).limit(MAX_HISTORY_SIZE).all()
             # Convert the chat logs into the desired format and reverse to start with the oldest
             history = [(chat.sentBy, chat.message) for chat in reversed(recent_chats)]
             return history
@@ -123,10 +121,9 @@ class LLMHandler:
 
 
     def send_chat(self, user_input):
-
         embeddings = OllamaEmbeddings(model=MODEL_NAME)
         vectorDb = FAISS.load_local(INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
-        retriever = vectorDb.as_retriever(search_kwargs={"k": self.MAX_CONTEXT_SIZE})
+        retriever = vectorDb.as_retriever(search_kwargs={"k": MAX_CONTEXT_SIZE})
 
         prompt = ChatPromptTemplate.from_messages([
             (ChatParticipant.SYSTEM.value, self.SYSTEM_MESSAGE + " Below is some context that might be helpful:\n\n{context}" + self.get_iot_data()),
@@ -178,7 +175,7 @@ class LLMHandler:
 
         self.history.append((ChatParticipant.USER.value, user_input))
         self.history.append((ChatParticipant.ASSISTANT.value, output))
-        self.history = self.history[-self.MAX_HISTORY_SIZE:]
+        self.history = self.history[-MAX_HISTORY_SIZE:]
         print(output)
 
         return output
