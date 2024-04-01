@@ -8,6 +8,7 @@ export const formatDate = (dateString: string) => {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
+    timeZone: "UTC",
   };
 
   // Using toLocaleString to combine date and time formatting in one go
