@@ -13,7 +13,10 @@ def create_chatlog():
 
 @bp.route('/', methods=['GET'])
 def get_chatlogs():
-    chats = Chatlog.query.all()
-    return jsonify([{'time': c.time, 'sentBy': c.sentBy, 'message': c.message} for c in chats]), 200
-
-# Additional routes for updating and deleting chatlogs can be added similarly to preferences_controller.py
+    page = request.args.get('page', 1, type=int)
+    size = request.args.get('size', 10, type=int)
+    pagination = Chatlog.query.order_by(Chatlog.time.desc()).paginate(page=page, per_page=size, error_out=False)
+    return jsonify({
+        'data': [chat.to_dict() for chat in pagination.items],
+        'total_pages': pagination.pages,
+        }), 200

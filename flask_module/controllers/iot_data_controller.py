@@ -24,16 +24,14 @@ def create_iot_data():
 
 @bp.route('/', methods=['GET'])
 def get_iot_data():
-    all_data = IoTData.query.all()
-    return jsonify([
-        {
-            'topic': d.topic,
-            'unit': d.unit,
-            'location': d.location,
-            'data': d.data,
-            'createdAt': d.createdAt
-        } for d in all_data
-    ]), 200
+    page = request.args.get('page', 1, type=int)
+    size = request.args.get('size', 10, type=int)
+    pagination = IoTData.query.order_by(IoTData.time.desc()).paginate(page=page, per_page=size, error_out=False)
+    all_data = pagination.items
+    return jsonify({
+        'data': [d.to_dict() for d in all_data],
+        'total_pages': pagination.pages,
+        }), 200
 
 @bp.route('/<int:id>', methods=['PUT'])
 def update_iot_data(id):

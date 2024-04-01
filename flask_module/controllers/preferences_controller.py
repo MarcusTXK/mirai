@@ -18,13 +18,13 @@ def create_preference():
 
 @bp.route('/', methods=['GET'])
 def get_preferences():
-    prefs = Preference.query.all()
-    return jsonify([{'id': p.id, 
-                     'description': p.description, 
-                     'createdAt': p.createdAt, 
-                     'updatedAt': p.updatedAt,
-                     'updatedBy': p.updatedBy,                      
-                     } for p in prefs]), 200
+    page = request.args.get('page', 1, type=int)
+    size = request.args.get('size', 10, type=int)
+    pagination = Preference.query.order_by(Preference.updatedAt.desc()).paginate(page=page, per_page=size, error_out=False)
+    return jsonify({
+        'data': [p.to_dict() for p in pagination.items],
+        'total_pages': pagination.pages,
+        }), 200
 
 @bp.route('/generate-index', methods=['POST'])
 def generate_preferences_index():
