@@ -1,4 +1,4 @@
-from mqtt_module.iot_device import IoTDevice\
+from mqtt_module.iot_device import IoTDevice
 
 # Config for MQTT
 MQTT_SERVER = "mqtt.eclipseprojects.io"
