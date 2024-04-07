@@ -24,9 +24,9 @@ class SpeechStreamer:
             audio_segment = self.audio_queue.get()
             if audio_segment is None:
                 break  # Check for the stop signal
-            global_state_manager.set_speaking(True)
-            play(audio_segment)  # Play the audio segment using blocking play function
+            global_state_manager.set_speaking(True)            
             print("speech spoken time taken: ", timeit.default_timer() - self.start_time)
+            play(audio_segment)  # Play the audio segment using blocking play function
             self.playback_complete.set()  # Signal that playback is complete
             self.audio_queue.task_done()
             global_state_manager.set_speaking(False)
