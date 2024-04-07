@@ -15,13 +15,13 @@ IOT_DEVICES = [
 IS_DEBUG = True
 IS_USE_TOOLS = False
 # Use context from preferences to improve answers
-IS_USE_CONTEXT = False
+IS_USE_CONTEXT = True
 MAX_CONTEXT_SIZE = 2
 # Use history from conversation to improve answers
-IS_USE_HISTORY = False
+IS_USE_HISTORY = True
 MAX_HISTORY_SIZE = 2
 # Use data from IoT devices to improve answers
-IS_USE_IOT_DATA = False
+IS_USE_IOT_DATA = True
 USER_NAME = "Marcus"
 WAKE_WORD = "" # Experimental, not recommended to set
 MODEL_NAME = "mistral-openorca:7b-q5_K_M"

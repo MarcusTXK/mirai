@@ -1,3 +1,4 @@
+import timeit
 from gtts import gTTS
 from io import BytesIO
 from pydub import AudioSegment
@@ -14,6 +15,7 @@ class SpeechStreamer:
         self.buffered_text = ""
         self.playback_thread.start()
         self.isSpeaking = False
+        self.start_time = timeit.default_timer()
 
     def audio_player(self):
         """Plays audio segments from the queue sequentially."""
@@ -24,6 +26,7 @@ class SpeechStreamer:
                 break  # Check for the stop signal
             global_state_manager.set_speaking(True)
             play(audio_segment)  # Play the audio segment using blocking play function
+            print("speech spoken time taken: ", timeit.default_timer() - self.start_time)
             self.playback_complete.set()  # Signal that playback is complete
             self.audio_queue.task_done()
             global_state_manager.set_speaking(False)
@@ -39,7 +42,6 @@ class SpeechStreamer:
             segment = AudioSegment.from_file(mp3_fp, format="mp3")
             print(f"Queuing: {text_chunk}")
             self.audio_queue.put(segment)  # Add the segment to the queue
-            
             self.playback_complete.wait()  # Wait for the playback to complete before returning
 
 
@@ -77,6 +79,7 @@ class SpeechStreamer:
             beep_sound_path=r"./resources/sounds/beep.mp3"
             beep_sound = AudioSegment.from_file(beep_sound_path)
             self.audio_queue.put(beep_sound)  # Queue the beep sound to indicate its complete
+        print("speech stop time taken: ", timeit.default_timer() - self.start_time)
         self.audio_queue.put(None)  # Signal the thread to stop
 
         self.playback_thread.join()

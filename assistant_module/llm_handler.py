@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import timeit
 from langchain_community.llms import Ollama
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.prompts import MessagesPlaceholder
@@ -103,7 +104,7 @@ class LLMHandler:
     def get_iot_data(self):
         if not IS_USE_IOT_DATA:
             return ""
-
+        start = timeit.default_timer()
         # Fetch the latest data for each IoT device
         device_messages = []
         with self.app.app_context():
@@ -117,6 +118,7 @@ class LLMHandler:
         # Append device messages to the system message
         additional_context = "\n".join(device_messages) 
         print("additional_context", additional_context)
+        print("get_iot_data time: ", timeit.default_timer() - start)
         return "\nIOT Sensor data that might be helpful: \n" + additional_context
 
 
@@ -131,11 +133,14 @@ class LLMHandler:
         ])
 
         if IS_USE_CONTEXT:
+            start = timeit.default_timer()
             embeddings = OllamaEmbeddings(model=MODEL_NAME)
             vectorDb = FAISS.load_local(INDEX_PATH, embeddings, allow_dangerous_deserialization=True)
             retriever = vectorDb.as_retriever(search_kwargs={"k": MAX_CONTEXT_SIZE})
             document_chain = create_stuff_documents_chain(self.llm, prompt)
             retrieval_chain = create_retrieval_chain(retriever, document_chain)
+            print("get preference embeddings time: ", timeit.default_timer() - start)
+
         else:
             retrieval_chain = prompt | self.llm           
     
@@ -144,7 +149,9 @@ class LLMHandler:
         isFirstChunk = True
         isSkipNext = False
         streamer = SpeechStreamer()
+        history_start = timeit.default_timer()
         history = self.history if IS_USE_HISTORY else []
+        print("get history time: ", timeit.default_timer() - history_start)
         for chunk in retrieval_chain.stream({"input": user_input, "chat_history": history}):
             # print("chunk:", chunk)
 

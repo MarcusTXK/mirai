@@ -10,6 +10,7 @@ import webrtcvad
 import logging
 from pywhispercpp._logger import set_log_level
 from pywhispercpp.model import Model
+import timeit
 
 class WhisperAssistant:
     """
@@ -95,6 +96,12 @@ class WhisperAssistant:
                 self._silence_counter += 1
 
     def _transcribe_speech(self):
+        def callback_wrapper(*args, **kwargs):
+            nonlocal start  # Use the start time from the outer scope
+            logging.info("Transcribe speech duration: " + str(timeit.default_timer() - start))
+            self._new_segment_callback(*args, **kwargs)  # Call the actual callback
+
+        start = timeit.default_timer()
         logging.info(f"Speech detected ...")
         audio_data = np.array([])
         while self.q.qsize() > 0:
@@ -104,7 +111,8 @@ class WhisperAssistant:
         audio_data = np.concatenate([audio_data, np.zeros((int(self.sample_rate) + 10))])
         # running the inference
         self.pwccp_model.transcribe(audio_data,
-                                    new_segment_callback=self._new_segment_callback)
+                                    new_segment_callback=callback_wrapper)
+
 
     def _new_segment_callback(self, seg):
         if self.commands_callback:
